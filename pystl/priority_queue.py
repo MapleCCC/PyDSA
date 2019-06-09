@@ -17,7 +17,7 @@ class PriorityQueue:
 
     def enqueue(self, element):
         self.storage.append(element)
-        self.push_up(len(self.storage)-1)
+        self.push_up(len(self.storage) - 1)
 
     def parent(self, index):
         return (index - 1) // 2

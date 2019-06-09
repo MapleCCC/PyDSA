@@ -57,6 +57,7 @@ class TestSort(unittest.TestCase):
 class TestQuickSort(TestSort):
     sorting_algorithm = quick_sort
 
+
 @unittest.skip("Not yet implemented")
 class TestSelectSort(TestSort):
     sorting_algorithm = select_sort

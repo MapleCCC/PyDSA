@@ -35,7 +35,7 @@ def quick_sort(array: Iterable):
     if pivot <= array[p]:
         return [pivot] + quick_sort(array[1:])
     else:
-        return quick_sort(array[1:p+1]) + [pivot] + quick_sort(array[p+1:])
+        return quick_sort(array[1:p + 1]) + [pivot] + quick_sort(array[p + 1:])
 
 
 def bucket_sort(array):
@@ -56,3 +56,5 @@ def bubble_sort(array):
 
 sorting_algorithms = [quick_sort, select_sort,
                       heap_sort, bubble_sort, bucket_sort]
+
+__all__ = [algorithm.__name__ for algorithm in sorting_algorithms]

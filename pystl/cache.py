@@ -9,7 +9,8 @@ SPECIAL_OBJECT = object()
 def calculate_key(*args, **kw):
     # When there is only one argument and its type is trivial, we simply return itself as a key.
     # This is for accelerating lookup speed, which is critical factor in Cache application.
-    # Some of ideas here owe reference and inspiration from Python's built-in functools module's source code.
+    # Some of ideas here owe reference and inspiration from Python's built-in
+    # functools module's source code.
     if len(args) == 1 and type(args[0]) in {int, str, frozenset, type(None)}:
         return args[0]
     arguments: list = args
@@ -74,7 +75,6 @@ class Cache:
 
     def __len__(self):
         return len(self._cache)
-
 
 
 class LRU_Cache:
@@ -152,4 +152,6 @@ class SplayTree_Cache:
     """
 
 
-# An implementation trick is we can use age_bit and PriorityQueue to emulate an actual splay tree. Not as efficient as splay tree, but far easier to implement.
+# An implementation trick is we can use age_bit and PriorityQueue to
+# emulate an actual splay tree. Not as efficient as splay tree, but far
+# easier to implement.

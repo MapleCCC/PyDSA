@@ -28,14 +28,14 @@ class SplaySubTree:
     # recursive function helper
     def insert_helper(self, key, value):
         if key < self.node.key:
-            if self.node.left != None:
+            if self.node.left is not None:
                 SplaySubTree(self.node.left).insert_helper(key, value)
             else:
                 new_node = Node(key, value)
                 new_node.parent = self.node
                 self.node.left = new_node
         elif key > self.node.key:
-            if self.node.right != None:
+            if self.node.right is not None:
                 SplaySubTree(self.node.right).insert_helper(key, value)
             else:
                 new_node = Node(key, value)
@@ -47,7 +47,7 @@ class SplaySubTree:
     def find_max_key(self):
         if self.is_empty_tree():
             return None
-        if self.node.right == None:
+        if self.node.right is None:
             return self.node.key, self.node.value
         key = SplaySubTree(self.node.right).find_max_key_helper()
         self.splay(key)
@@ -55,7 +55,7 @@ class SplaySubTree:
 
     # recursive function helper
     def find_max_key_helper(self):
-        if self.node.right == None:
+        if self.node.right is None:
             return self.node.key
         else:
             return SplaySubTree(self.node.right).find_max_key_helper()
@@ -63,26 +63,26 @@ class SplaySubTree:
     def find_min_key(self):
         if self.is_empty_tree():
             return None
-        if self.node.left == None:
+        if self.node.left is None:
             return self.node.key, self.node.value
         key = SplaySubTree(self.node.left).find_min_key_helper()
         self.splay(key)
         return self.node.key, self.node.value
 
     def find_min_key_helper(self):
-        if self.node.left == None:
+        if self.node.left is None:
             return self.node.left
         else:
             return SplaySubTree(self.node.left).find_min_key_helper()
 
     # No return value to indicate if the desired key is found.
     def delete(self, key):
-        if self.find(key) == None:
+        if self.find(key) is None:
             return
 
-        if self.node.left == None and self.node.right == None:
+        if self.node.left is None and self.node.right is None:
             self.node = None
-        elif self.node.left != None:
+        elif self.node.left is not None:
             SplaySubTree(self.node.left).find_max_key()
             self.node.left.right = self.node.right
             self.node.left.parent = self.node.parent
@@ -160,13 +160,13 @@ class SplaySubTree:
         if self.is_empty_tree():
             return True
         else:
-            return self.node.parent == None
+            return self.node.parent is None
 
     def has_no_grand_parent(self):
         if self.has_no_parent():
             return True
         else:
-            return self.node.parent.parent == None
+            return self.node.parent.parent is None
 
     def push_oneself_upward(self):
         if self.is_empty_tree():
@@ -184,13 +184,14 @@ class SplaySubTree:
     # OUTPUT: boolean indicating whether succeed in finding the key
     def splay(self, key):
         new_root = self.splay_helper(key)
-        if new_root == None:
+        if new_root is None:
             return False
         else:
             self.node = new_root
             return True
 
-    # OUTPUT: root of rearranged tree, i.e., the node with key inputted. None if key is not found.
+    # OUTPUT: root of rearranged tree, i.e., the node with key inputted. None
+    # if key is not found.
     def splay_helper(self, key):
         if self.is_empty_tree():
             return None
@@ -207,7 +208,7 @@ class SplaySubTree:
     def splay_nearest_key(self, key):
         self.find_max_key()
         itr = self.node
-        while itr != None:
+        while itr is not None:
             if key >= itr.key:
                 left_distance = key - itr.key
                 right_distance = itr.parent.key - key
@@ -226,7 +227,7 @@ class SplaySubTree:
         self.find_max_key()
         itr = self.node
         temp = []
-        while itr != None:
+        while itr is not None:
             temp.append((itr.key, itr.value))
             itr = itr.left
         return "A splay tree object: %s" % temp
@@ -238,17 +239,18 @@ class SplaySubTree:
         self.find_max_key()
         itr = self.node
         temp = []
-        while itr != None:
+        while itr is not None:
             temp.append((itr.key, itr.value))
             itr = itr.left
         return iter(temp)
 
     @property
     def size(self):
-        if self.node == None:
+        if self.node is None:
             return 0
         else:
-            return 1 + SplaySubTree(self.node.left).size + SplaySubTree(self.node.right).size
+            return 1 + SplaySubTree(self.node.left).size + \
+                SplaySubTree(self.node.right).size
 
     # Reduce size by half
     # Expensive operation, be cautious to use.
@@ -275,5 +277,5 @@ class SplaySubTree:
 class SplayTree(SplaySubTree):
     def __init__(self, root=None):
         SplaySubTree.__init__(self, root)
-        if self.node != None:
+        if self.node is not None:
             self.node.parent = None
