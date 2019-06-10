@@ -263,7 +263,7 @@ class SplaySubTree:
 
         self.find_max_key()
         itr = self.node
-        for i in range(self.size // 2):
+        for _ in range(self.size // 2):
             itr = itr.left
         itr.parent.left = None
 

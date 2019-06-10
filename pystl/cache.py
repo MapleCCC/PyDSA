@@ -1,9 +1,6 @@
 __all__ = ["Cache", "cache_decorator"]
 
-import functools
-
-
-SPECIAL_OBJECT = object()
+from functools import wraps
 
 
 def calculate_key(*args, **kw):
@@ -11,14 +8,19 @@ def calculate_key(*args, **kw):
     # This is for accelerating lookup speed, which is critical factor in Cache application.
     # Some of ideas here owe reference and inspiration from Python's built-in
     # functools module's source code.
-    if len(args) == 1 and type(args[0]) in {int, str, frozenset, type(None)}:
+    trivial_type = {int, str, frozenset, type(None)}
+    if len(args) == 1 and len(kw) == 0 and type(args[0]) in trivial_type:
         return args[0]
+
     arguments: list = args
     keywords: dict = kw
-    pickled = arguments + (SPECIAL_OBJECT,)
+    global sentinel
+    sentinel = object()
+    pickled = arguments + (sentinel,)
     for k, v in enumerate(keywords):
         pickled += (k, v)
     pickled = tuple(pickled)
+
     try:
         return hash(pickled)
     except TypeError:
@@ -33,7 +35,7 @@ def cache_decorator(algorithm="LRU", maxsize=None):
     """
     def decorator(user_function):
         cache = Cache(algorithm, maxsize)
-        @functools.wraps(user_function)
+        @wraps(user_function)
         def wrapper(*args, **kw):
             key = calculate_key(*args, **kw)
             query_result = cache.find(key)
@@ -42,6 +44,7 @@ def cache_decorator(algorithm="LRU", maxsize=None):
             return_value = user_function(*args, **kw)
             cache.insert(key, return_value)
             return return_value
+        wrapper.__cache__ = cache
         return wrapper
     return decorator
 
@@ -56,7 +59,14 @@ class Cache:
             self._cache = SplayTree_Cache(maxsize)
         else:
             raise ValueError(
-                ('''You should choose a valid cache algorithm. Options include                     following: '''))
+                ('''You should choose a valid cache algorithm. Options include following:
+                1. LRU
+                    Least recently used entry is discarded when the cache is full.
+                2. Clock
+                    [......]
+                3. SplayTree
+                    More recently accessed entry is easier to retrieve.'''))
+        self.algorithm = algorithm
 
     def insert(self, key, value):
         self._cache.insert(key, value)
@@ -67,6 +77,22 @@ class Cache:
     def delete(self, key):
         self._cache.delete(key)
 
+    @property
+    def hit(self):
+        return self._cache.hit
+
+    @property
+    def miss(self):
+        return self._cache.miss
+
+    @property
+    def hit_rate(self):
+        return self._cache.hit_rate
+
+    @property
+    def size(self):
+        return self._cache.size
+
     def __str__(self):
         return self._cache.__class__.__name__
 
@@ -74,7 +100,7 @@ class Cache:
         return self.__str__()
 
     def __len__(self):
-        return len(self._cache)
+        return self.size
 
 
 class LRU_Cache:
@@ -101,9 +127,11 @@ class LRU_Cache:
 
         self._cache = {}
         self.recency_bookkeep = []  # keep track of the least recently used entry
+        self.hit = 0
+        self.miss = 0
 
     def insert(self, key, value):
-        result = self.find(key)
+        result = self._find(key)
         if result is not None:
             if result == value:
                 self.recency_bookkeep.remove(key)
@@ -121,19 +149,35 @@ class LRU_Cache:
 
         # print("The bookkeep is {}".format(self.recency_bookkeep))
 
-    def find(self, key):
-        try:
+    def _find(self, key):
+        if key in self._cache.keys():
             return self._cache[key]
-        except KeyError:
+        else:
             return None
+
+    def find(self, key):
+        result = self._find(key)
+        if result is None:
+            self.miss += 1
+        else:
+            self.hit += 1
+        return result
 
     def delete(self, key):
         if key in self._cache:
             del self._cache[key]
             self.recency_bookkeep.remove(key)
 
-    def __len__(self):
+    @property
+    def size(self):
         return len(self._cache)
+
+    def __len__(self):
+        return self.size
+
+    @property
+    def hit_rate(self):
+        return self.hit/(self.hit+self.miss)
 
 
 class Clock_Cache:
