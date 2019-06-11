@@ -1,19 +1,31 @@
+"""
+BinarySearchTree
+
+Complexity:
+| Operation | Complexity |
+----------------------
+| insert() | O(H) |
+| find() | O(H) |
+| delete() | O(H) |
+| size | O(1) |
+| height | O(N) |
+
+where H denotes tree height, which is in average is O(logN), where N is number of nodes.
+"""
+
 __all__ = ["BinarySearchTree", "BST"]
 
 import inspect
 import types
 import math
-from queue import Queue
-
-# class Tree:
-#     pass
-
-# Empty_Tree = object()
+from collections import OrderedDict
+from ..queue import Queue
+from ..stack import Stack
 
 
 def check_comparable(func):
-    error_messages = {"'<' not supported",
-                      "'>' not supported", "'==' not supported", "'>=' not supported", "'<=' not supported"}
+    error_messages = {"'<' not supported", "'>' not supported",
+                      "'==' not supported", "'>=' not supported", "'<=' not supported"}
 
     def wrapper(*args, **kw):
         try:
@@ -53,7 +65,33 @@ class BinarySearchTree:
         self.root = None
         self.size = 0
 
-    def _insert(self, node, key, value=None):
+    # TODO: make height computation O(1) instead of O(N)
+    @property
+    def height(self):
+        return self._height(self.root)
+
+    def _height(self, node):
+        if node is None:
+            return 0
+        return 1 + max(self._height(node.left), self._height(node.right))
+
+    def isEmpty(self):
+        return self.size == 0
+
+    def __len__(self):
+        return self.size
+
+    def __iter__(self):
+        return self.flatten().items()
+
+    def insert(self, key, value=None):
+        if self.root is None:
+            self.root = Node(key, value)
+            self.size += 1
+        else:
+            self._insert(self.root, key, value)
+
+    def _insert(self, node, key, value):
         if key == node.key:
             node.value = value
             return
@@ -62,24 +100,25 @@ class BinarySearchTree:
             if node.right is None:
                 node.right = Node(key, value)
                 self.size += 1
-                return
             else:
                 self._insert(node.right, key, value)
+            return
 
         if key < node.key:
             if node.left is None:
                 node.left = Node(key, value)
                 self.size += 1
-                return
             else:
                 self._insert(node.left, key, value)
+            return
 
-    def insert(self, key, value=None):
+    def find(self, key):
+        """
+            Return None if not found.
+        """
         if self.root is None:
-            self.root = Node(key, value)
-            self.size += 1
-        else:
-            self._insert(self.root, key, value)
+            return None
+        return self._find(self.root, key)
 
     def _find(self, node, key):
         if key == node.key:
@@ -95,21 +134,50 @@ class BinarySearchTree:
                 return None
             return self._find(node.left, key)
 
-    def find(self, key):
-        """
-            Return None if not found.
-        """
+    def delete(self, key):
         if self.root is None:
-            return None
-        return self._find(self.root, key)
+            return
+        if self.root.key == key:
+            if self.root.left is None and self.root.right is None:
+                self.root = None
+                self.size -= 1
+            else:
+                self._delete_intermediate_node(self.root)
+        else:
+            self._delete(self.root, key)
 
-    def delete_node(self, node):
-        # This comment block not workable, because Python is pass-by-object-reference.
-        # if node.left is None and node.right is None:
-        #     node = None
-        #     self.size -= 1
-        #     return
+    def _delete(self, node, key):
+        if key > node.key:
+            if node.right is None:
+                return
+            if node.right.key == key:
+                self._delete_child(node, node.right)
+            else:
+                self._delete(node.right, key)
+            return
 
+        if key < node.key:
+            if node.left is None:
+                return
+            if key == node.left.key:
+                self._delete_child(node, node.left)
+            else:
+                self._delete(node.left, key)
+            return
+
+    def _delete_child(self, node, child):
+        if child.left is None and child.right is None:
+            if node.left is child:
+                node.left = None
+            elif node.right is child:
+                node.right = None
+            else:
+                raise ValueError("Fake child !")
+            self.size -= 1
+        else:
+            self._delete_intermediate_node(child)
+
+    def _delete_intermediate_node(self, node):
         if node.left is None:
             new = self._find_min_node(node.right)
             key, value = new.key, new.value
@@ -124,59 +192,126 @@ class BinarySearchTree:
             node.key, node.value = key, value
             return
 
-    def _delete(self, node, key):
-        if key == node.key:
-            self.delete_node(node)
-            return
-
-        if key > node.key:
-            if node.right is None:
-                return
-            if key == node.right.key and node.right.left is None and node.right.right is None:
-                node.right = None
-                self.size -= 1
-            else:
-                self._delete(node.right, key)
-            return
-
-        if key < node.key:
-            if node.left is None:
-                return
-            if key == node.left.key and node.left.left is None and node.left.right is None:
-                node.right = None
-                self.size -= 1
-            else:
-                self._delete(node.left, key)
-            return
-
-    def delete(self, key):
+    def find_min_node(self):
         if self.root is None:
-            return
-        if key == self.root.key and self.root.left is None and self.root.right is None:
-            self.root = None
-            self.size -= 1
-        else:
-            self._delete(self.root, key)
+            return None
+        return self._find_min_node(self.root)
 
     def _find_min_node(self, node):
         if node.left is None:
             return node
         return self._find_min_node(node.left)
 
-    def find_min_node(self):
+    def find_max_node(self):
         if self.root is None:
             return None
-        return self._find_min_node(self.root)
+        return self._find_max_node(self.root)
 
     def _find_max_node(self, node):
         if node.right is None:
             return node
         return self._find_max_node(node.right)
 
-    def find_max_node(self):
+    def flatten(self):
+        order_by_rank = OrderedDict()
+
+        # while self.size != 0:
+        #     min_node = self.find_min_node()
+        #     order_by_rank[min_node.key] = min_node.value
+        #     self.delete(min_node)
+
+        def store_to_result(key, value):
+            order_by_rank[key] = value
+        self.traverse(store_to_result, "in_order")
+
+        return order_by_rank
+
+    def traverse(self, func, order="in_order"):
+        """
+        func takes a node (of type Node) as parameter
+        """
+        if order == "pre_order":
+            self.pre_order_traverse(func)
+        elif order == "post_order":
+            self.post_order_traverse(func)
+        elif order == "in_order":
+            self.in_order_traverse(func)
+        else:
+            raise ValueError("Wrong ordering chosen.")
+
+    def pre_order_traverse(self, func):
         if self.root is None:
-            return None
-        return self._find_max_node(self.root)
+            return
+        q = Queue()
+        q.enqueue(self.root)
+        while not q.isEmpty():
+            node = q.dequeue()
+            func(node)
+            if node.left is not None:
+                q.enqueue(node.left)
+            if node.right is not None:
+                q.enqueue(node.right)
+
+    def post_order_traverse(self, func):
+        if self.root is None:
+            return
+        VISITED = 1
+        UNVISITED = 0
+        s = Stack()
+        s.push([self.root, UNVISITED])
+        while not s.isEmpty():
+            node, is_visited = s.pop()
+            if is_visited == UNVISITED:
+                s.push([node, VISITED])
+                if node.right is not None:
+                    s.push([node.right, UNVISITED])
+                if node.left is not None:
+                    s.push([node.left, UNVISITED])
+            else:
+                func(node)
+
+    def in_order_traverse(self, func):
+        if self.root is None:
+            return
+        VISITED = 1
+        UNVISITED = 0
+        s = Stack()
+        s.push([self.root, UNVISITED])
+        while not s.isEmpty():
+            node, is_visited = s.pop()
+            if is_visited == UNVISITED:
+                if node.right is not None:
+                    s.push([node.right, UNVISITED])
+                s.push([node, VISITED])
+                if node.left is not None:
+                    s.push([node.left, UNVISITED])
+            else:
+                func(node)
+
+    # def visualize(self):
+    #     q = Queue()
+
+    #     def log(node):
+    #         q.enqueue(node.key)
+    #     self.traverse(log, order="pre_order")
+
+    #     h = self.height
+
+    #     node_num_of_full_tree = 2 ** h - 1
+    #     res = node_num_of_full_tree - q.size
+    #     for _ in range(res):
+    #         q.enqueue(' ')
+    #     print("\n")
+    #     for n in range(h):
+    #         margin = ' ' * (3 * h - 3 * n -2)
+    #         interval = ' ' * 5
+    #         s = margin
+    #         for _ in range(2 ** n):
+    #             s += str(q.dequeue()) + interval
+    #         s = s[:-5]
+    #         s += margin
+    #         print(s)
+    #     print("\n")
 
 
 # Alias
