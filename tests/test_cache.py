@@ -1,4 +1,4 @@
-from ..cache import *
+from algorithms.cache import *
 import unittest
 from time import time
 from random import randint
@@ -27,9 +27,14 @@ class TestLRUCache(TestCache):
     cache_algorithm = "LRU"
 
 
-@unittest.skip("No Implemented")
+@unittest.skip("Not Implemented")
+class TestClockCache(TestCache):
+    cache_algorithm = "Clock"
+
+
+@unittest.skip("Not Implemented")
 class TestSplayTreeCache(TestCache):
-    cache_algorithm = "SplayTree_Cache"
+    cache_algorithm = "SplayTree"
 
 
 def Fibonacci(n):
@@ -77,3 +82,7 @@ class TestCacheDecorator(unittest.TestCase):
         # print("Original: {}\nNew: {}".format(original, new))
 
         self.assertLess(new, original)
+
+
+if __name__ == "__main__":
+    unittest.main()

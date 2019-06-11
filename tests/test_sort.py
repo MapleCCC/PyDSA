@@ -1,4 +1,4 @@
-from ..sort import *
+from algorithms.sort import *
 import unittest
 from collections import Counter
 
@@ -74,3 +74,6 @@ class TestHeapSort(TestSort):
 # unittest.TextTestRunner().run(suite)
 
 # unittest.main()
+
+if __name__ == "__main__":
+    unittest.main()

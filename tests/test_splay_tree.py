@@ -1,4 +1,4 @@
-from ..splay_tree import SplayTree
+from algorithms.tree.splay_tree import SplayTree
 import unittest
 
 

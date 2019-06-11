@@ -1,4 +1,4 @@
-from ..bst import BST
+from algorithms.tree.bst import BST
 import unittest
 
 
@@ -33,3 +33,7 @@ class TestBinarySearchTree(unittest.TestCase):
         self.bst.insert([])
         with self.assertRaises(ValueError):
             self.bst.insert({})
+
+
+if __name__ == "__main__":
+    unittest.main()
