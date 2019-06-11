@@ -179,18 +179,68 @@ class BinarySearchTree:
 
     def _delete_intermediate_node(self, node):
         if node.left is None:
-            new = self._find_min_node(node.right)
-            key, value = new.key, new.value
-            self._delete(node, new.key)
-            node.key, node.value = key, value
+            if node.right.left is None:
+                temp = node.right
+                node.right = node.right.right
+                self.size -= 1
+            else:
+                temp = self._delete_min_node(node.right)
+            node.key, node.value = temp.key, temp.value
             return
 
         if node.right is None:
-            new = self._find_max_node(node.left)
-            key, value = new.key, new.value
-            self._delete(node, new.key)
-            node.key, node.value = key, value
+            if node.left.right is None:
+                temp = node.left
+                node.left = node.left.left
+                self.size -= 1
+            else:
+                temp = self._delete_max_node(node.left)
+            node.key, node.value = temp.key, temp.value
             return
+
+    def delete_min_node(self):
+        """
+        Return the min node.
+        Return None if tree is empty.
+        """
+        if self.root is None:
+            return None
+        if self.root.left is None:
+            temp = self.root
+            self.root = self.root.right
+            self.size -= 1
+            return temp
+        return self._delete_min_node(self.root)
+
+    def _delete_min_node(self, node):
+        if node.left.left is None:
+            temp = node.left
+            node.left = node.left.right
+            self.size -= 1
+            return temp
+        return self._delete_min_node(node.left)
+
+    def delete_max_node(self):
+        """
+        Return the max node.
+        Return None if tree is empty.
+        """
+        if self.root is None:
+            return None
+        if self.root.right is None:
+            temp = self.root
+            self.root = self.root.left
+            self.size -= 1
+            return temp
+        return self._delete_max_node(self.root)
+
+    def _delete_max_node(self, node):
+        if node.right.right is None:
+            temp = node.right
+            node.right = node.right.left
+            self.size -= 1
+            return temp
+        return self._delete_max_node(node.right)
 
     def find_min_node(self):
         if self.root is None:
