@@ -1,26 +1,26 @@
-class PriorityQueue:
-    def __init__(self, min=True):
-        self.storage = []
+"""
+PriorityQueue
 
-    @property
-    def size(self):
-        return len(self.storage)
+Complexity
+----------
+| Operation | Complexity |
+--------------------------
+| enqueue | O(logN) |
+| dequeue | O(logN) |
+| head | O(1) |
+"""
 
-    def isEmpty(self):
-        return self.size == 0
+from .heap import Heap
 
-    @property
-    def top(self):
-        if self.isEmpty():
-            return None
-        return self.storage[0]
 
-    def enqueue(self, element):
-        self.storage.append(element)
-        self.push_up(len(self.storage) - 1)
+class PriorityQueue(Heap):
+    def enqueue(self, key, value=None):
+        self.insert(key, value)
 
-    def parent(self, index):
-        return (index - 1) // 2
+    def dequeue(self):
+        key, value = self.top
+        self.delete(key)
+        return key, value
 
-    def push_up(self, index):
-        pass
+    def head(self):
+        return self.top
