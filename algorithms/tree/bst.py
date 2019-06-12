@@ -85,32 +85,21 @@ class BinarySearchTree:
         return iter(self.flatten().items())
 
     def insert(self, key, value=None):
-        if self.root is None:
-            self.root = Node(key, value)
-            self.size += 1
-        else:
-            self._insert(self.root, key, value)
+        self.root = self._insert(self.root, key, value)
 
     def _insert(self, node, key, value):
+        if node is None:
+            self.size += 1
+            return Node(key, value)
+
         if key == node.key:
             node.value = value
-            return
+        elif key < node.key:
+            node.left = self._insert(node.left, key, value)
+        else:
+            node.right = self._insert(node.right, key, value)
 
-        if key > node.key:
-            if node.right is None:
-                node.right = Node(key, value)
-                self.size += 1
-            else:
-                self._insert(node.right, key, value)
-            return
-
-        if key < node.key:
-            if node.left is None:
-                node.left = Node(key, value)
-                self.size += 1
-            else:
-                self._insert(node.left, key, value)
-            return
+        return node
 
     def find(self, key):
         """
@@ -129,143 +118,79 @@ class BinarySearchTree:
         else:
             return self._find(node.left, key)
 
-    # DONE: improve delete performance
-    # Done: delete routine also returns the deleted nodes' value. So as to has consistent behaviour with Queue.dequeue, Stack.pop.
-    # TODO: Simplify delete routine, right now is too complicated, this should not be such non-trivial.
     def delete(self, key):
-        if self.root is None:
-            return
-        if self.root.key == key:
-            if self.root.left is None and self.root.right is None:
-                value = self.root.value
-                self.root = None
-                self.size -= 1
-                return value
-            else:
-                return self._delete_intermediate_node(self.root)
-        else:
-            return self._delete(self.root, key)
+        self.root = self._delete(self.root, key)
 
     def _delete(self, node, key):
-        if key > node.key:
-            if node.right is None:
-                return None
-            if node.right.key == key:
-                return self._delete_child(node, node.right)
-            else:
-                return self._delete(node.right, key)
+        if node is None:
+            return None
 
-        if key < node.key:
-            if node.left is None:
-                return None
-            if key == node.left.key:
-                return self._delete_child(node, node.left)
-            else:
-                return self._delete(node.left, key)
-
-    def _delete_child(self, node, child):
-        if child.left is None and child.right is None:
-            value = child.value
-            if node.left is child:
-                node.left = None
-            elif node.right is child:
-                node.right = None
-            else:
-                raise ValueError("Fake child !")
+        if key == node.key:
             self.size -= 1
-            return value
+            return self._delete_THE_node(node)
+        elif key < node.key:
+            node.left = self._delete(node.left, key)
+            return node
         else:
-            return self._delete_intermediate_node(child)
+            node.right = self._delete(node.right, key)
+            return node
 
-    def _delete_intermediate_node(self, node):
-        value = node.value
-
-        if node.left is None:
-            if node.right.left is None:
-                temp = node.right
-                node.right = node.right.right
-                self.size -= 1
-            else:
-                temp = self._delete_min_node(node.right)
-            node.key, node.value = temp.key, temp.value
-        elif node.right is None:
-            if node.left.right is None:
-                temp = node.left
-                node.left = node.left.left
-                self.size -= 1
-            else:
-                temp = self._delete_max_node(node.left)
-            node.key, node.value = temp.key, temp.value
-
-        return value
+    def _delete_THE_node(self, node):
+        if node is None:
+            return None
+        if node.left is not None:
+            left_max_node = self._find_max_node(node.left)
+            left_max_node.right = node.right
+            return node.left
+        else:
+            return node.right
 
     def delete_min_node(self):
-        """
-        Return the min node.
-        Return None if tree is empty.
-        """
-        if self.root is None:
-            return None
-        if self.root.left is None:
-            temp = self.root
-            self.root = self.root.right
-            self.size -= 1
-            return temp
-        return self._delete_min_node(self.root)
+        self.root = self._delete_min_node(self.root)
 
     def _delete_min_node(self, node):
-        if node.left.left is None:
-            temp = node.left
-            node.left = node.left.right
-            self.size -= 1
-            return temp
-        return self._delete_min_node(node.left)
+        if node is None:
+            return None
+        if node.left is None:
+            return None
+        node.left = self._delete_min_node(node.left)
+        return node
 
     def delete_max_node(self):
-        """
-        Return the max node.
-        Return None if tree is empty.
-        """
-        if self.root is None:
-            return None
-        if self.root.right is None:
-            temp = self.root
-            self.root = self.root.left
-            self.size -= 1
-            return temp
-        return self._delete_max_node(self.root)
+        self.root = self._delete_max_node(self.root)
 
     def _delete_max_node(self, node):
-        if node.right.right is None:
-            temp = node.right
-            node.right = node.right.left
-            self.size -= 1
-            return temp
-        return self._delete_max_node(node.right)
+        if node is None:
+            return None
+        if node.right is None:
+            return None
+        node.right = self._delete_max_node(node.right)
+        return node
 
     def clear(self):
         self.root = None
         self.size = 0
 
     def find_min_node(self):
-        if self.root is None:
-            return None
         return self._find_min_node(self.root)
 
     def _find_min_node(self, node):
+        if node is None:
+            return None
         if node.left is None:
             return node
         return self._find_min_node(node.left)
 
     def find_max_node(self):
-        if self.root is None:
-            return None
         return self._find_max_node(self.root)
 
     def _find_max_node(self, node):
+        if node is None:
+            return None
         if node.right is None:
             return node
-        return self._find_max_node(node.right)
+        else:
+            return self._find_max_node(node.right)
 
     def flatten(self, order="in_order"):
         flattened = OrderedDict()
@@ -275,15 +200,24 @@ class BinarySearchTree:
         #     order_by_rank[min_node.key] = min_node.value
         #     self.delete(min_node)
 
-        def store_to_result(node):
-            flattened[node.key] = node.value
+        def store_to_result(key, value):
+            flattened[key] = value
         self.traverse(store_to_result, order)
 
         return flattened
 
     def traverse(self, func, order="in_order"):
         """
-        func takes a node (of type Node) as parameter
+        func takes two parameters: key, value
+        """
+        def wrapper(node):
+            return func(node.key, node.value)
+
+        return self._traverse(wrapper, order)
+
+    def _traverse(self, func, order="in_order"):
+        """
+        func takes one parameter: node
         """
         if order == "pre_order":
             self.pre_order_traverse(func)

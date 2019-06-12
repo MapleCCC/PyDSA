@@ -42,8 +42,8 @@ class TestBinarySearchTree(unittest.TestCase):
         self._construct_trivial_case()
         result = []
 
-        def log(node):
-            result.append(node.key)
+        def log(key, value):
+            result.append(key)
         self.bst.traverse(log, "in_order")
         self.assertEqual(result, [1, 3, 4, 5, 6, 7])
 
@@ -51,8 +51,8 @@ class TestBinarySearchTree(unittest.TestCase):
         self._construct_trivial_case()
         result = []
 
-        def log(node):
-            result.append(node.key)
+        def log(key, value):
+            result.append(key)
         self.bst.traverse(log, "pre_order")
         self.assertEqual(result, [6, 4, 7, 1, 5, 3])
 
@@ -60,8 +60,8 @@ class TestBinarySearchTree(unittest.TestCase):
         self._construct_trivial_case()
         result = []
 
-        def log(node):
-            result.append(node.key)
+        def log(key, value):
+            result.append(key)
         self.bst.traverse(log, "post_order")
         self.assertEqual(result, [3, 1, 5, 4, 7, 6])
 
