@@ -23,7 +23,8 @@ class TestBinarySearchTree(unittest.TestCase):
 
     def test_delete(self):
         self.bst.insert(1, 100)
-        self.bst.delete(1)
+        self.assertIsNone(self.bst.delete(2))
+        self.assertEqual(self.bst.delete(1), 100)
         self.assertIsNone(self.bst.find(1))
 
     def test_trivial_case(self):

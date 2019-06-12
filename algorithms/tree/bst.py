@@ -10,7 +10,7 @@ Complexity:
 | get size | O(1) |
 | get height | O(N) |
 
-where H denotes tree height, which is in average is O(logN), where N is number of nodes.
+where H denotes tree height, which is in average O(logN), where N is number of nodes.
 """
 
 __all__ = ["BinarySearchTree", "BST", "LazyBinarySearchTree"]
@@ -135,41 +135,42 @@ class BinarySearchTree:
             return self._find(node.left, key)
 
     # DONE: improve delete performance
-    # TODO: delete routine also returns the deleted nodes' value. So as to has consistent behaviour with Queue.dequeue, Stack.pop.
+    # Done: delete routine also returns the deleted nodes' value. So as to has consistent behaviour with Queue.dequeue, Stack.pop.
     # TODO: Simplify delete routine, right now is too complicated, this should not be such non-trivial.
     def delete(self, key):
         if self.root is None:
             return
         if self.root.key == key:
             if self.root.left is None and self.root.right is None:
+                value = self.root.value
                 self.root = None
                 self.size -= 1
+                return value
             else:
-                self._delete_intermediate_node(self.root)
+                return self._delete_intermediate_node(self.root)
         else:
-            self._delete(self.root, key)
+            return self._delete(self.root, key)
 
     def _delete(self, node, key):
         if key > node.key:
             if node.right is None:
-                return
+                return None
             if node.right.key == key:
-                self._delete_child(node, node.right)
+                return self._delete_child(node, node.right)
             else:
-                self._delete(node.right, key)
-            return
+                return self._delete(node.right, key)
 
         if key < node.key:
             if node.left is None:
-                return
+                return None
             if key == node.left.key:
-                self._delete_child(node, node.left)
+                return self._delete_child(node, node.left)
             else:
-                self._delete(node.left, key)
-            return
+                return self._delete(node.left, key)
 
     def _delete_child(self, node, child):
         if child.left is None and child.right is None:
+            value = child.value
             if node.left is child:
                 node.left = None
             elif node.right is child:
@@ -177,10 +178,13 @@ class BinarySearchTree:
             else:
                 raise ValueError("Fake child !")
             self.size -= 1
+            return value
         else:
-            self._delete_intermediate_node(child)
+            return self._delete_intermediate_node(child)
 
     def _delete_intermediate_node(self, node):
+        value = node.value
+
         if node.left is None:
             if node.right.left is None:
                 temp = node.right
@@ -189,9 +193,7 @@ class BinarySearchTree:
             else:
                 temp = self._delete_min_node(node.right)
             node.key, node.value = temp.key, temp.value
-            return
-
-        if node.right is None:
+        elif node.right is None:
             if node.left.right is None:
                 temp = node.left
                 node.left = node.left.left
@@ -199,7 +201,8 @@ class BinarySearchTree:
             else:
                 temp = self._delete_max_node(node.left)
             node.key, node.value = temp.key, temp.value
-            return
+
+        return value
 
     def delete_min_node(self):
         """
@@ -391,31 +394,30 @@ class LazyBinarySearchTree(BinarySearchTree):
                 self.insert(k, v)
 
     def delete(self, key):
-        self.lazy_delete(key)
+        return self.lazy_delete(key)
 
     def lazy_delete(self, key):
         if self.root is None:
-            return
-        self._lazy_delete(self.root, key)
+            return None
+        return self._lazy_delete(self.root, key)
 
     def _lazy_delete(self, node, key):
         if key == node.key:
+            value = node.value
             self.gabbages.append(node.key)
             if len(self.gabbages) / self.size >= 0.1:
                 self.gabbage_collect()
-            return
+            return value
 
         if key < node.key:
             if node.left is None:
-                return
-            self._delete(node.left, key)
-            return
+                return None
+            return self._delete(node.left, key)
 
         if key > node.key:
             if node.right is None:
-                return
-            self._delete(node.right, key)
-            return
+                return None
+            return self._delete(node.right, key)
 
 
 # Alias
