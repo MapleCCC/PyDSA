@@ -7,13 +7,13 @@ Complexity:
 | insert() | O(H) |
 | find() | O(H) |
 | delete() | O(H) |
-| size | O(1) |
-| height | O(N) |
+| get size | O(1) |
+| get height | O(N) |
 
 where H denotes tree height, which is in average is O(logN), where N is number of nodes.
 """
 
-__all__ = ["BinarySearchTree", "BST"]
+__all__ = ["BinarySearchTree", "BST", "LazyBinarySearchTree"]
 
 import inspect
 import types
@@ -82,7 +82,7 @@ class BinarySearchTree:
         return self.size
 
     def __iter__(self):
-        return self.flatten().items()
+        return iter(self.flatten().items())
 
     def insert(self, key, value=None):
         if self.root is None:
@@ -134,6 +134,9 @@ class BinarySearchTree:
                 return None
             return self._find(node.left, key)
 
+    # DONE: improve delete performance
+    # TODO: delete routine also returns the deleted nodes' value. So as to has consistent behaviour with Queue.dequeue, Stack.pop.
+    # TODO: Simplify delete routine, right now is too complicated, this should not be such non-trivial.
     def delete(self, key):
         if self.root is None:
             return
@@ -242,6 +245,10 @@ class BinarySearchTree:
             return temp
         return self._delete_max_node(node.right)
 
+    def clear(self):
+        self.root = None
+        self.size = 0
+
     def find_min_node(self):
         if self.root is None:
             return None
@@ -262,19 +269,19 @@ class BinarySearchTree:
             return node
         return self._find_max_node(node.right)
 
-    def flatten(self):
-        order_by_rank = OrderedDict()
+    def flatten(self, order="in_order"):
+        flattened = OrderedDict()
 
         # while self.size != 0:
         #     min_node = self.find_min_node()
         #     order_by_rank[min_node.key] = min_node.value
         #     self.delete(min_node)
 
-        def store_to_result(key, value):
-            order_by_rank[key] = value
-        self.traverse(store_to_result, "in_order")
+        def store_to_result(node):
+            flattened[node.key] = node.value
+        self.traverse(store_to_result, order)
 
-        return order_by_rank
+        return flattened
 
     def traverse(self, func, order="in_order"):
         """
@@ -362,6 +369,53 @@ class BinarySearchTree:
     #         s += margin
     #         print(s)
     #     print("\n")
+
+
+class LazyBinarySearchTree(BinarySearchTree):
+    def __init__(self):
+        super().__init__()
+        self.gabbages = []
+
+    def clear(self):
+        super().clear()
+        self.gabbages.clear()
+
+    def gabbage_collect(self):
+        flattend = self.flatten(order="pre_order")
+        self.root = None
+        self.size = 0
+        for k, v in flattend.items():
+            if k in self.gabbages:
+                self.gabbages.remove(k)
+            else:
+                self.insert(k, v)
+
+    def delete(self, key):
+        self.lazy_delete(key)
+
+    def lazy_delete(self, key):
+        if self.root is None:
+            return
+        self._lazy_delete(self.root, key)
+
+    def _lazy_delete(self, node, key):
+        if key == node.key:
+            self.gabbages.append(node.key)
+            if len(self.gabbages) / self.size >= 0.1:
+                self.gabbage_collect()
+            return
+
+        if key < node.key:
+            if node.left is None:
+                return
+            self._delete(node.left, key)
+            return
+
+        if key > node.key:
+            if node.right is None:
+                return
+            self._delete(node.right, key)
+            return
 
 
 # Alias

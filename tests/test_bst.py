@@ -1,6 +1,5 @@
-from algorithms.tree.bst import BST
+from algorithms.tree.bst import BST, LazyBinarySearchTree
 import unittest
-from collections import OrderedDict
 
 
 class TestBinarySearchTree(unittest.TestCase):
@@ -70,13 +69,18 @@ class TestBinarySearchTree(unittest.TestCase):
         self.bst.delete(1)
         self.assertEqual(self.bst.height, 3)
 
-    def teset_iterable(self):
+    def test_iterator_type(self):
         self._construct_trivial_case()
-        result = OrderedDict()
+        result = []
         for k, v in self.bst:
-            result[k] = v
-        self.assertEqual(result, OrderedDict(
-            [(1, None), (3, None), (4, None), (5, None), (6, 100), (7, None)]))
+            result.append((k, v))
+        self.assertEqual(
+            result, [(1, None), (3, None), (4, None), (5, None), (6, 100), (7, None)])
+
+
+class TestLazyBinarySearchTree(TestBinarySearchTree):
+    def setUp(self):
+        self.bst = LazyBinarySearchTree()
 
 
 if __name__ == "__main__":
