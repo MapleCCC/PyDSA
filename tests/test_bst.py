@@ -10,27 +10,34 @@ class TestBinarySearchTree(unittest.TestCase):
         del self.bst
 
     def _construct_trivial_case(self):
-        self.bst.insert(6, 100)
-        self.bst.insert(7)
-        self.bst.insert(4)
-        self.bst.insert(1)
-        self.bst.insert(5)
-        self.bst.insert(3)
+        self.bst.insert(6, 600)
+        self.bst.insert(9, 900)
+        self.bst.insert(4, 400)
+        self.bst.insert(1, 100)
+        self.bst.insert(5, 500)
+        self.bst.insert(3, 300)
+        self.bst.insert(7, 700)
+        self.bst.insert(8, 800)
+        self.bst.insert(2, 200)
 
     def test_insert(self):
         self.bst.insert(1, 100)
         self.assertEqual(self.bst.find(1), 100)
+        self.assertEqual(len(self.bst), 1)
+        self.bst.insert(1, 200)
+        self.assertEqual(self.bst.find(1), 200)
+        self.assertEqual(len(self.bst), 1)
 
     def test_delete(self):
         self.bst.insert(1, 100)
-        self.assertIsNone(self.bst.delete(2))
-        self.assertEqual(self.bst.delete(1), 100)
+        self.assertEqual(self.bst.find(1), 100)
+        self.bst.delete(1)
         self.assertIsNone(self.bst.find(1))
 
     def test_trivial_case(self):
         self._construct_trivial_case()
         self.bst.delete(1)
-        self.assertEqual(self.bst.size, 5)
+        self.assertEqual(self.bst.size, 8)
         self.assertIsNone(self.bst.find(1))
 
     def test_incomparable_key_type(self):
@@ -39,44 +46,44 @@ class TestBinarySearchTree(unittest.TestCase):
             self.bst.insert({})
 
     def test_in_order_traversal(self):
-        self._construct_trivial_case()
-        result = []
+        self._test_traverse("in_order", [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
-        def log(key, value):
-            result.append(key)
-        self.bst.traverse(log, "in_order")
-        self.assertEqual(result, [1, 3, 4, 5, 6, 7])
+    def test_out_order_traversal(self):
+        self._test_traverse("out_order", [9, 8, 7, 6, 5, 4, 3, 2, 1])
 
     def test_pre_order_traversal(self):
-        self._construct_trivial_case()
-        result = []
-
-        def log(key, value):
-            result.append(key)
-        self.bst.traverse(log, "pre_order")
-        self.assertEqual(result, [6, 4, 7, 1, 5, 3])
+        self._test_traverse("pre_order", [6, 4, 1, 3, 2, 5, 9, 7, 8])
 
     def test_post_order_traversal(self):
+        self._test_traverse("post_order", [2, 3, 1, 5, 4, 8, 7, 9, 6])
+
+    def test_breadth_first_order_traversal(self):
+        self._test_traverse("breadth_first_order", [
+                            6, 4, 9, 1, 5, 7, 3, 8, 2])
+
+    def _test_traverse(self, order, supposed_result):
         self._construct_trivial_case()
         result = []
 
         def log(key, value):
             result.append(key)
-        self.bst.traverse(log, "post_order")
-        self.assertEqual(result, [3, 1, 5, 4, 7, 6])
+        self.bst.traverse(log, order)
+        self.assertEqual(result, supposed_result)
 
     def test_height(self):
+        self.assertEqual(self.bst.height, 0)
         self._construct_trivial_case()
-        self.bst.delete(1)
-        self.assertEqual(self.bst.height, 3)
+        self.assertEqual(self.bst.height, 5)
+        # Should not test height after any deletion operation.
+        # Unlike insertion operation, which lead to deterministic tree layout.
+        # deletion operation have non-unique implementation approach that could lead to different tree layout afterwards.
 
     def test_iterator_type(self):
         self._construct_trivial_case()
         result = []
         for k, v in self.bst:
             result.append((k, v))
-        self.assertEqual(
-            result, [(1, None), (3, None), (4, None), (5, None), (6, 100), (7, None)])
+        self.assertEqual(result, [(i+1, (i+1)*100) for i in range(9)])
 
 
 class TestLazyBinarySearchTree(TestBinarySearchTree):
