@@ -1,10 +1,13 @@
 class Queue:
     def __init__(self):
-        self.storage = []
+        self._q = []
 
     @property
     def size(self):
-        return len(self.storage)
+        return len(self._q)
+
+    def __len__(self):
+        return self.size
 
     def isEmpty(self):
         return self.size == 0
@@ -13,14 +16,14 @@ class Queue:
     def head(self):
         if self.isEmpty():
             return None
-        return self.storage[0]
+        return self._q[0]
 
     def enqueue(self, element):
-        self.storage.append(element)
+        self._q.append(element)
 
     def dequeue(self):
         if self.isEmpty():
-            raise BaseException("Cannot dequeue an empty queue.")
+            return None
         temp = self.head
-        self.storage = self.storage[1:]
+        self._q = self._q[1:]
         return temp

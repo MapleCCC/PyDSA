@@ -7,7 +7,7 @@ class Stack:
 
     def pop(self):
         if self.isEmpty():
-            raise BaseException("Cannot pop an empty stack!")
+            return None
         temp = self.top
         self.storage = self.storage[:-1]
         return temp
@@ -22,6 +22,5 @@ class Stack:
     @property
     def top(self):
         if self.isEmpty():
-            # return None
-            raise BaseException("An empty stack has not top.")
+            return None
         return self.storage[-1]
