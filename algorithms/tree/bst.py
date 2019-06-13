@@ -82,7 +82,8 @@ class BinarySearchTree:
         return self.size
 
     def __iter__(self):
-        return iter(self.flatten().items())
+        # in_order traversal retrieves nodes in sorted order
+        return iter(self.flatten("in_order").items())
 
     def insert(self, key, value=None):
         self.root = self._insert(self.root, key, value)
@@ -195,15 +196,9 @@ class BinarySearchTree:
     def flatten(self, order="in_order"):
         flattened = OrderedDict()
 
-        # while self.size != 0:
-        #     min_node = self.find_min_node()
-        #     order_by_rank[min_node.key] = min_node.value
-        #     self.delete(min_node)
-
-        def store_to_result(key, value):
+        def log(key, value):
             flattened[key] = value
-        self.traverse(store_to_result, order)
-
+        self.traverse(log, order)
         return flattened
 
     def traverse(self, func, order="in_order"):
@@ -225,57 +220,62 @@ class BinarySearchTree:
             self.post_order_traverse(func)
         elif order == "in_order":
             self.in_order_traverse(func)
+        elif order == "out_order":
+            self.out_order_traverse(func)
+        elif order == "breadth_first_order":
+            self.breadth_first_order_traverse(func)
         else:
             raise ValueError("Wrong ordering chosen.")
 
     def pre_order_traverse(self, func):
-        if self.root is None:
+        self._pre_order_traverse(self.root, func)
+
+    def _pre_order_traverse(self, node, func):
+        if node is None:
             return
+        func(node)
+        self._pre_order_traverse(node.left, func)
+        self._pre_order_traverse(node.right, func)
+
+    def post_order_traverse(self, func):
+        self._post_order_traverse(self.root, func)
+
+    def _post_order_traverse(self, node, func):
+        if node is None:
+            return
+        self._post_order_traverse(node.left, func)
+        self._post_order_traverse(node.right, func)
+        func(node)
+
+    def in_order_traverse(self, func):
+        self._in_order_traverse(self.root, func)
+
+    def _in_order_traverse(self, node, func):
+        if node is None:
+            return
+        self._in_order_traverse(node.left, func)
+        func(node)
+        self._in_order_traverse(node.right, func)
+
+    def out_order_traverse(self, func):
+        self._out_order_traverse(self.root, func)
+
+    def _out_order_traverse(self, node, func):
+        if node is None:
+            return
+        self._out_order_traverse(node.right, func)
+        func(node)
+        self._out_order_traverse(node.left, func)
+
+    def breadth_first_order_traverse(self, func):
         q = Queue()
         q.enqueue(self.root)
         while not q.isEmpty():
             node = q.dequeue()
-            func(node)
-            if node.left is not None:
+            if node is not None:
+                func(node)
                 q.enqueue(node.left)
-            if node.right is not None:
                 q.enqueue(node.right)
-
-    def post_order_traverse(self, func):
-        if self.root is None:
-            return
-        VISITED = 1
-        UNVISITED = 0
-        s = Stack()
-        s.push([self.root, UNVISITED])
-        while not s.isEmpty():
-            node, is_visited = s.pop()
-            if is_visited == UNVISITED:
-                s.push([node, VISITED])
-                if node.right is not None:
-                    s.push([node.right, UNVISITED])
-                if node.left is not None:
-                    s.push([node.left, UNVISITED])
-            else:
-                func(node)
-
-    def in_order_traverse(self, func):
-        if self.root is None:
-            return
-        VISITED = 1
-        UNVISITED = 0
-        s = Stack()
-        s.push([self.root, UNVISITED])
-        while not s.isEmpty():
-            node, is_visited = s.pop()
-            if is_visited == UNVISITED:
-                if node.right is not None:
-                    s.push([node.right, UNVISITED])
-                s.push([node, VISITED])
-                if node.left is not None:
-                    s.push([node.left, UNVISITED])
-            else:
-                func(node)
 
     # def visualize(self):
     #     q = Queue()
