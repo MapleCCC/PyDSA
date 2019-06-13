@@ -116,22 +116,17 @@ class BinarySearchTree:
         """
             Return None if not found.
         """
-        if self.root is None:
-            return None
         return self._find(self.root, key)
 
     def _find(self, node, key):
+        if node is None:
+            return None
+
         if key == node.key:
             return node.value
-
-        if key > node.key:
-            if node.right is None:
-                return None
+        elif key > node.key:
             return self._find(node.right, key)
-
-        if key < node.key:
-            if node.left is None:
-                return None
+        else:
             return self._find(node.left, key)
 
     # DONE: improve delete performance
