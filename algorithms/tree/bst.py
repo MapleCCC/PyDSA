@@ -54,6 +54,13 @@ class Node:
         self.left = None
         self.right = None
 
+    def __str__(self):
+        return "Node(key={}, value={})".format(self.key, self.value)
+        # return "({}, {})".format(self.key, self.value)
+
+    def __repr__(self):
+        return self.__str__()
+
 
 @decorate_all_methods(check_comparable)
 class BinarySearchTree:

@@ -1,10 +1,10 @@
-from algorithms.tree.splay_tree import SplayTree
+from algorithms.tree.splay_tree import TopDownSplayTree, ButtomUpSplayTree
 import unittest
 
 
-class SplayTreeTest(unittest.TestCase):
+class TestTopDownSplayTree(unittest.TestCase):
     def setUp(self):
-        self.st = SplayTree()
+        self.st = TopDownSplayTree()
 
     def tearDown(self):
         del self.st
@@ -50,6 +50,11 @@ class SplayTreeTest(unittest.TestCase):
     #     self.st.cut_by_half()
     #     # print(self.st)
     #     self.assertEqual(self.st.size, 2)
+
+
+class TestButtomUpSplayTree(TestTopDownSplayTree):
+    def setUp(self):
+        self.st = ButtomUpSplayTree()
 
 
 if __name__ == '__main__':

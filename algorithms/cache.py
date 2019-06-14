@@ -1,6 +1,7 @@
 __all__ = ["Cache", "cache_decorator"]
 
 from functools import wraps
+from .tree.splay_tree import SplayTree_Cache
 
 
 def calculate_key(*args, **kw):
@@ -183,17 +184,6 @@ class LRU_Cache:
 class Clock_Cache:
     def __init__(self, maxsize):
         pass
-
-
-class SplayTree_Cache:
-    """
-    The more recently used an entry is, the easier to retrieve it.
-
-    Advantage: can store more amount of data than LRU_Cache
-    Disadvantage: uneven access time for different stored data
-    Philosophy is to tradeoff space with time.
-    Underlying data structure is splay tree. (linked binary tree)
-    """
 
 
 # An implementation trick is we can use age_bit and PriorityQueue to

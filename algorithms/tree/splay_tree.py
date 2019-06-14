@@ -1,4 +1,4 @@
-__all__ = ["SplayTree"]
+__all__ = ["SplayTree", "SplayTree_Cache"]
 
 from .bst import BinarySearchTree, Node
 
@@ -7,46 +7,40 @@ LEFT = 1
 RIGHT = 0
 
 
-class SplayTreeImpl1(BinarySearchTree):
-    def insert(self, key, value=None):
-        super().insert(key, value)
-        self.splay(key)
-
-    def find(self, key):
-        result = super().find(key)
-        if result is not None:
-            self.splay(key)
-        return result
-
-    def splay(self, key):
+class BSTWithSplayMethod(BinarySearchTree):
+    def _splay(self, key):
         bookkeep = self.track(key)
-        if len(bookkeep) == 1:
-            return
-        # if the key cannot be found, splay its supposed parent instead.
-        # Such strategy is for some implementation methods of `insert` and `find`
+
         if bookkeep[-1] is None:
-            bookkeep = bookkeep[:-2]
-        self._splay_helper(bookkeep)
-
-    def _splay_helper(self, bookkeep):
-        if len(bookkeep) == 1:
-            return
-        if len(bookkeep) == 3:
-            self.single_rotate(bookkeep)
-            return
-        self.double_rotate(bookkeep)
-        self._splay_helper(bookkeep[:-5])
-
-    def single_rotate(self, bookkeep):
-        self.zig(*bookkeep[-3:])
-
-    def double_rotate(self, bookkeep):
-        branch1 = bookkeep[-4]
-        branch2 = bookkeep[-2]
-        if branch1 == branch2:
-            self.zig_zig(*bookkeep[-5:])
+            # if the key cannot be found, splay last visited node instead.
+            # Such strategy is for some implementation methods of `insert` and `find`
+            path_nodes = bookkeep[:-2]
         else:
-            self.zig_zag(*bookkeep[-5:])
+            path_nodes = bookkeep
+
+        self._splay_helper(path_nodes)
+
+    def _splay_helper(self, path_nodes):
+        if len(path_nodes) in {0, 1}:
+            return
+        elif len(path_nodes) == 3:
+            self.single_rotate(*path_nodes[-3:])
+            self._splay_helper(path_nodes[:-2])
+        elif len(path_nodes) >= 5:
+            self.double_rotate(*path_nodes[-5:])
+            self._splay_helper(path_nodes[:-4])
+        else:
+            raise ValueError(
+                "Something went wrong. path_nodes is {}".format(path_nodes))
+
+    def single_rotate(self, node1, branch, node2):
+        self.zig(node1, branch, node2)
+
+    def double_rotate(self, node1, branch1, node2, branch2, node3):
+        if branch1 == branch2:
+            self.zig_zig(node1, branch1, node2, branch2, node3)
+        else:
+            self.zig_zag(node1, branch1, node2, branch2, node3)
 
     def zig_zag(self, node1, branch1, node2, branch2, node3):
         self.zig(node2, branch2, node3)
@@ -57,57 +51,64 @@ class SplayTreeImpl1(BinarySearchTree):
         self.zig(node1, branch2, node3)
 
     def zig(self, node1, branch, node2):
+        # Note that we should manipulate node1 and node2's pointer
+        # instead of directly reassign themselves
+        # because of Python's pass-by-object-reference mechanism
+        self._swap(node1, node2)
+
         if branch == LEFT:
-            node1.key, node2.key = (node2.key, node1.key)
-            node1.value, node2.value = (node2.value, node1.value)
             node1.left = node2.left
             node2.left = node2.right
             node2.right = node1.right
             node1.right = node2
-            return
-
-        if branch == RIGHT:
-            node1.key, node2.key = (node2.key, node1.key)
-            node1.value, node2.value = (node2.value, node1.value)
+        elif branch == RIGHT:
             node1.right = node2.right
             node2.right = node2.left
             node2.left = node1.left
             node1.left = node2
-            return
+        else:
+            raise ValueError("Something went wrong.")
 
-    def _track(self, node, key, bookkeep):
-        if key == node.key:
-            bookkeep.append(node)
-            return
-
-        if key < node.key:
-            bookkeep += [node, LEFT]
-            if node.left is None:
-                bookkeep.append(None)
-                return
-            self._track(node.left, key, bookkeep)
-            return
-
-        if key > node.key:
-            bookkeep += [node, RIGHT]
-            if node.right is None:
-                bookkeep.append(None)
-                return
-            self._track(node.right, key, bookkeep)
-            return
+    def _swap(self, node1, node2):
+        node1.key, node2.key = node2.key, node1.key
+        node1.value, node2.value = node2.value, node1.value
 
     def track(self, key):
         bookkeep = []
-        if self.root is None:
-            bookkeep.append(None)
-        else:
-            self._track(self.root, key, bookkeep)
+        self._track(self.root, key, bookkeep)
         return bookkeep
 
+    def _track(self, node, key, bookkeep):
+        if node is None:
+            bookkeep.append(node)
+            return
 
-class SplayTreeImpl2(SplayTreeImpl1):
+        if key == node.key:
+            bookkeep.append(node)
+            return
+        elif key < node.key:
+            bookkeep += [node, LEFT]
+            self._track(node.left, key, bookkeep)
+        else:
+            bookkeep += [node, RIGHT]
+            self._track(node.right, key, bookkeep)
+
+
+class ButtomUpSplayTree(BSTWithSplayMethod):
     def insert(self, key, value=None):
-        self.splay(key)
+        super().insert(key, value)
+        self._splay(key)
+
+    def find(self, key):
+        result = super().find(key)
+        if result is not None:
+            self._splay(key)
+        return result
+
+
+class TopDownSplayTree(BSTWithSplayMethod):
+    def insert(self, key, value=None):
+        self._splay(key)
 
         if self.root is None:
             self.root = Node(key, value)
@@ -137,7 +138,7 @@ class SplayTreeImpl2(SplayTreeImpl1):
             return
 
     def find(self, key, value=None):
-        self.splay(key)
+        self._splay(key)
 
         if self.root is None:
             return None
@@ -148,4 +149,140 @@ class SplayTreeImpl2(SplayTreeImpl1):
             return None
 
 
-SplayTree = SplayTreeImpl2
+class SplayTree_Cache(TopDownSplayTree):
+    """
+        The more recently used an entry is, the easier to retrieve it.
+
+        Advantage: can store more amount of data than LRU_Cache
+        Disadvantage: uneven access time for different stored data.
+        Philosophy is to tradeoff more effort in insertion to save future lookup time. (amortized technique)
+        Underlying data structure is splay tree. (linked binary tree)
+    """
+
+    def __init__(self, maxsize):
+        super().__init__()
+        self.hit = 0
+        self.miss = 0
+
+        if maxsize is not None and not isinstance(maxsize, int):
+            raise ValueError("Please use integer value for maxsize.")
+        elif maxsize is None:
+            self.maxsize = 128
+        else:
+            self.maxsize = maxsize
+
+    def zig(self, node1, branch, node2):
+        super().zig(node1, branch, node2)
+        self._update_node_height(node1)
+        self._update_node_height(node2)
+
+    def insert(self, key, value=None):
+        super().insert(key, value)
+        if self.root is None:
+            return
+
+        self._update_node_height(self.root.left)
+        self._update_node_height(self.root.right)
+        self._update_node_height(self.root)
+
+        if self.size > self.maxsize:
+            self.delete_deepest_node()
+
+    def _update_node_height(self, node):
+        if node is None:
+            return
+
+        if node.left is None and node.right is None:
+            node.height = 0
+        elif node.left is None:
+            node.height = node.right.height + 1
+        elif node.right is None:
+            node.height = node.left.height + 1
+        else:
+            node.height = max(node.left.height, node.right.height) + 1
+
+    def delete(self, key):
+        self.root = self._delete(self.root, key)
+
+    def _delete(self, node, key):
+        if node is None:
+            return None
+
+        if key == node.key:
+            self.size -= 1
+            return self._delete_THE_node(node)
+        elif key < node.key:
+            node.left = self._delete(node.left, key)
+        else:
+            node.right = self._delete(node.right, key)
+
+        self._update_node_height(node)
+        return node
+
+    def _delete_THE_node(self, node):
+        if node is None:
+            return None
+        if node.left is not None:
+            bookkeep = []
+            self._track_max_node(node.left, bookkeep)
+            left_max_node = bookkeep[-1]
+            left_max_node.right = node.right
+            map(self._update_node_height, bookkeep[::-1])
+            return node.left
+        else:
+            return node.right
+
+    def track_max_node(self):
+        bookkeep = []
+        self._track_max_node(self.root, bookkeep)
+        return bookkeep
+
+    def _track_max_node(self, node, bookkeep):
+        if node is None:
+            return
+        bookkeep.append(node)
+        self._track_max_node(node.right, bookkeep)
+
+    def delete_deepest_node(self):
+        self.root = self._delete_deepest_node(self.root)
+
+    def _delete_deepest_node(self, node):
+        if node is None:
+            return None
+
+        if node.left is None and node.right is None:
+            self.size -= 1
+            return None
+        elif node.left is None:
+            node.right = self._delete_deepest_node(node.right)
+        elif node.right is None:
+            node.left = self._delete_deepest_node(node.left)
+        elif node.height == node.left.height + 1:
+            node.left = self._delete_deepest_node(node.left)
+        elif node.height == node.right.height + 1:
+            node.right = self._delete_deepest_node(node.right)
+        else:
+            raise ValueError("Something went wrong.")
+
+        self._update_node_height(node)
+        return node
+
+    def find(self, key, value=None):
+        self._splay(key)
+
+        if self.root is None:
+            return None
+
+        if key == self.root.key:
+            self.hit += 1
+            return self.root.value
+        else:
+            self.miss += 1
+            return None
+
+    @property
+    def hit_rate(self):
+        return self.hit/(self.hit+self.miss)
+
+
+SplayTree = TopDownSplayTree
