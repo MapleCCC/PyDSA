@@ -1,6 +1,6 @@
 __all__ = ["SplayTree"]
 
-from .bst import BinarySearchTree
+from .bst import BinarySearchTree, Node
 
 
 LEFT = 1
@@ -22,6 +22,8 @@ class SplayTreeImpl1(BinarySearchTree):
         bookkeep = self.track(key)
         if len(bookkeep) == 1:
             return
+        # if the key cannot be found, splay its supposed parent instead.
+        # Such strategy is for some implementation methods of `insert` and `find`
         if bookkeep[-1] is None:
             bookkeep = bookkeep[:-2]
         self._splay_helper(bookkeep)
@@ -63,6 +65,7 @@ class SplayTreeImpl1(BinarySearchTree):
             node2.right = node1.right
             node1.right = node2
             return
+
         if branch == RIGHT:
             node1.key, node2.key = (node2.key, node1.key)
             node1.value, node2.value = (node2.value, node1.value)
@@ -97,12 +100,52 @@ class SplayTreeImpl1(BinarySearchTree):
         bookkeep = []
         if self.root is None:
             bookkeep.append(None)
-        self._track(self.root, key, bookkeep)
+        else:
+            self._track(self.root, key, bookkeep)
         return bookkeep
 
 
-class SplayTreeImpl2(BinarySearchTree):
-    pass
+class SplayTreeImpl2(SplayTreeImpl1):
+    def insert(self, key, value=None):
+        self.splay(key)
+
+        if self.root is None:
+            self.root = Node(key, value)
+            self.size += 1
+            return
+
+        if key == self.root.key:
+            self.root.value = value
+            return
+
+        if key > self.root.key:
+            new = Node(key, value)
+            new.left = self.root
+            new.right = self.root.right
+            self.root.right = None
+            self.root = new
+            self.size += 1
+            return
+
+        if key < self.root.key:
+            new = Node(key, value)
+            new.right = self.root
+            new.left = self.root.left
+            self.root.left = None
+            self.root = new
+            self.size += 1
+            return
+
+    def find(self, key, value=None):
+        self.splay(key)
+
+        if self.root is None:
+            return None
+
+        if key == self.root.key:
+            return self.root.value
+        else:
+            return None
 
 
-SplayTree = SplayTreeImpl1
+SplayTree = SplayTreeImpl2
