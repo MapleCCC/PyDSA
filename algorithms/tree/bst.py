@@ -13,7 +13,7 @@ Complexity:
 where H denotes tree height, which is in average O(logN), where N is number of nodes.
 """
 
-__all__ = ["BinarySearchTree", "BST", "LazyBinarySearchTree"]
+__all__ = ["BinarySearchTree", "BST"]
 
 import inspect
 import types
@@ -308,52 +308,6 @@ class BinarySearchTree:
     #         s += margin
     #         print(s)
     #     print("\n")
-
-
-class LazyBinarySearchTree(BinarySearchTree):
-    def __init__(self):
-        super().__init__()
-        self.gabbages = []
-
-    def clear(self):
-        super().clear()
-        self.gabbages.clear()
-
-    def gabbage_collect(self):
-        flattend = self.flatten(order="pre_order")
-        self.root = None
-        self.size = 0
-        for k, v in flattend.items():
-            if k in self.gabbages:
-                self.gabbages.remove(k)
-            else:
-                self.insert(k, v)
-
-    def delete(self, key):
-        return self.lazy_delete(key)
-
-    def lazy_delete(self, key):
-        if self.root is None:
-            return None
-        return self._lazy_delete(self.root, key)
-
-    def _lazy_delete(self, node, key):
-        if key == node.key:
-            value = node.value
-            self.gabbages.append(node.key)
-            if len(self.gabbages) / self.size >= 0.1:
-                self.gabbage_collect()
-            return value
-
-        if key < node.key:
-            if node.left is None:
-                return None
-            return self._delete(node.left, key)
-
-        if key > node.key:
-            if node.right is None:
-                return None
-            return self._delete(node.right, key)
 
 
 # Alias

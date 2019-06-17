@@ -1,4 +1,4 @@
-from algorithms.tree.bst import BST, LazyBinarySearchTree
+from algorithms.tree.bst import BST
 import unittest
 
 
@@ -84,11 +84,6 @@ class TestBinarySearchTree(unittest.TestCase):
         for k, v in self.bst:
             result.append((k, v))
         self.assertEqual(result, [(i+1, (i+1)*100) for i in range(9)])
-
-
-class TestLazyBinarySearchTree(TestBinarySearchTree):
-    def setUp(self):
-        self.bst = LazyBinarySearchTree()
 
 
 if __name__ == "__main__":
