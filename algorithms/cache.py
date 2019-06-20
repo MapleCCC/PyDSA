@@ -200,19 +200,51 @@ class Clock_Cache:
         pass
 
 
+class ComparableWrapper:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+    def __lt__(self, arg):
+        assert isinstance(arg, ComparableWrapper)
+        return self.key < arg.key
+
+    def __gt__(self, arg):
+        assert isinstance(arg, ComparableWrapper)
+        return self.key > arg.key
+
+    def __eq__(self, arg):
+        assert isinstance(arg, ComparableWrapper)
+        return self.key == arg.key
+
+
 class SplayTree_Cache(SplayTreeWithMaxsize):
     def __init__(self, maxsize):
         super().__init__(maxsize)
         self._hit = 0
         self._miss = 0
 
-    def find(self, key):
-        result = super().find(key)
+    def insert(self, key, value):
+        result = self.find(key)
         if result is None:
-            self._miss += 1
+            super().insert(ComparableWrapper(key, value))
+        elif result == value:
+            return
         else:
+            self.delete(key)
+            super().insert(ComparableWrapper(key, value))
+
+    def find(self, key):
+        result = super().find(ComparableWrapper(key, None))
+        if result is True:
             self._hit += 1
-        return result
+            return self.root.value
+        else:
+            self._miss += 1
+            return None
+
+    def delete(self, key):
+        super().delete(ComparableWrapper(key, None))
 
     @property
     def hit(self):
@@ -224,7 +256,7 @@ class SplayTree_Cache(SplayTreeWithMaxsize):
 
     @property
     def hit_rate(self):
-        return self.hit/(self.hit+self.miss)
+        return self._hit/(self._hit+self._miss)
 
 # An implementation trick is we can use age_bit and PriorityQueue to
 # emulate an actual splay tree. Not as efficient as splay tree, but far

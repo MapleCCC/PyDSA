@@ -242,8 +242,8 @@ class SplayTreeWithMaxsize(SplayTree):
         self._update_node_height(node1)
         self._update_node_height(node2)
 
-    def insert(self, key, value=None):
-        super().insert(key, value)
+    def insert(self, value):
+        super().insert(value)
         if self._root is None:
             return
 
@@ -267,20 +267,20 @@ class SplayTreeWithMaxsize(SplayTree):
         else:
             node.height = max(node.left.height, node.right.height) + 1
 
-    def delete(self, key):
-        self._root = self._delete(self._root, key)
+    def delete(self, value):
+        self._root = self._delete(self._root, value)
 
-    def _delete(self, node, key):
+    def _delete(self, node, value):
         if node is None:
             return None
 
-        if key == node.key:
+        if value == node.value:
             self.size -= 1
             return self._delete_THE_node(node)
-        elif key < node.key:
-            node.left = self._delete(node.left, key)
+        elif value < node.value:
+            node.left = self._delete(node.left, value)
         else:
-            node.right = self._delete(node.right, key)
+            node.right = self._delete(node.right, value)
 
         self._update_node_height(node)
         return node
