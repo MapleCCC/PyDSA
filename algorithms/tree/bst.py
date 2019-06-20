@@ -88,7 +88,7 @@ class BinarySearchTree(BinaryTree):
 
     def _insert(self, node, value):
         if node is None:
-            self.size += 1
+            self._size += 1
             return Node(value)
 
         if value == node.value:
@@ -122,7 +122,7 @@ class BinarySearchTree(BinaryTree):
             return None
 
         if value == node.value:
-            self.size -= 1
+            self._size -= 1
             return self._delete_THE_node(node)
         elif value < node.value:
             node.left = self._delete(node.left, value)
@@ -148,7 +148,7 @@ class BinarySearchTree(BinaryTree):
         if node is None:
             return None
         if node.left is None:
-            self.size -= 1
+            self._size -= 1
             return None
         node.left = self._delete_min_node(node.left)
         return node
@@ -160,7 +160,7 @@ class BinarySearchTree(BinaryTree):
         if node is None:
             return None
         if node.right is None:
-            self.size -= 1
+            self._size -= 1
             return None
         node.right = self._delete_max_node(node.right)
         return node

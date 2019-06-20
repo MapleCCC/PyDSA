@@ -29,7 +29,7 @@ class BottomUpSplayTree(BinaryTree):
 
         if self._root is None:
             self._root = Node(value)
-            self.size += 1
+            self._size += 1
             return
 
         if value == self._root.value:
@@ -41,7 +41,7 @@ class BottomUpSplayTree(BinaryTree):
             new.right = self._root.right
             self._root.right = None
             self._root = new
-            self.size += 1
+            self._size += 1
             return
 
         if value < self._root.value:
@@ -50,7 +50,7 @@ class BottomUpSplayTree(BinaryTree):
             new.left = self._root.left
             self._root.left = None
             self._root = new
-            self.size += 1
+            self._size += 1
             return
 
     def delete(self, value):
@@ -61,7 +61,7 @@ class BottomUpSplayTree(BinaryTree):
             return None
 
         if value == node.value:
-            self.size -= 1
+            self._size -= 1
             return self._delete_THE_node(node)
         elif value < node.value:
             node.left = self._delete(node.left, value)
@@ -275,7 +275,7 @@ class SplayTreeWithMaxsize(SplayTree):
             return None
 
         if value == node.value:
-            self.size -= 1
+            self._size -= 1
             return self._delete_THE_node(node)
         elif value < node.value:
             node.left = self._delete(node.left, value)
@@ -317,7 +317,7 @@ class SplayTreeWithMaxsize(SplayTree):
             return None
 
         if node.left is None and node.right is None:
-            self.size -= 1
+            self._size -= 1
             return None
         elif node.left is None:
             node.right = self._delete_deepest_node(node.right)

@@ -42,17 +42,21 @@ class Node:
 class Tree:
     def __init__(self):
         self._root = None
-        self.size = 0
+        self._size = 0
 
     def clear(self):
         self._root = None
-        self.size = 0
+        self._size = 0
 
     @property
     def root(self):
         if self._root is None:
             return None
         return self._root.value
+
+    @property
+    def size(self):
+        return self._size
 
     def isEmpty(self):
         return self.size == 0
