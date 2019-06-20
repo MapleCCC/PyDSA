@@ -62,10 +62,8 @@ class TestSplayTreeCache(TestCache):
         self.assertEqual(self.cache.size, 9)
         self.cache.insert(10, 1000)
         self.assertEqual(self.cache.size, 9)
-        self.assertIsNone(self.cache.find(5))
         self.cache.insert(11, 1100)
         self.assertEqual(self.cache.size, 9)
-        self.assertIsNone(self.cache.find(3))
 
 
 def Fibonacci(n):
