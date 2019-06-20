@@ -81,6 +81,7 @@ class BinarySearchTree(BinaryTree):
 
     def insert(self, value):
         self._root = self.recur_insert(self._root, value)
+        return self
 
     def recur_insert(self, node, value):
         if node is None:
@@ -112,6 +113,7 @@ class BinarySearchTree(BinaryTree):
 
     def delete(self, value):
         self._root = self.recur_delete(self._root, value)
+        return self
 
     def recur_delete(self, node, value):
         if node is None:
@@ -165,3 +167,9 @@ class BinarySearchTree(BinaryTree):
 
 # Alias
 BST = BinarySearchTree
+
+if __name__ == '__main__':
+    tree1 = BST()
+    tree1.insert(2).insert(1).insert(4).insert(3).insert(5).delete(5)
+
+    print(tree1)
