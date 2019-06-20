@@ -83,55 +83,52 @@ class BinarySearchTree(BinaryTree):
             return 0
         return 1 + max(self._height(node.left), self._height(node.right))
 
-    def insert(self, key, value=None):
-        self.root = self._insert(self.root, key, value)
+    def insert(self, value):
+        self.root = self._insert(self.root, value)
 
-    def _insert(self, node, key, value):
+    def _insert(self, node, value):
         if node is None:
             self.size += 1
-            return Node(key, value)
+            return Node(value)
 
-        if key == node.key:
-            node.value = value
-        elif key < node.key:
-            node.left = self._insert(node.left, key, value)
-        else:
-            node.right = self._insert(node.right, key, value)
-
-        return node
-
-    def find(self, key):
-        """
-            Return None if not found.
-        """
-        return self._find(self.root, key)
-
-    def _find(self, node, key):
-        if node is None:
-            return None
-
-        if key == node.key:
-            return node.value
-        elif key > node.key:
-            return self._find(node.right, key)
-        else:
-            return self._find(node.left, key)
-
-    def delete(self, key):
-        self.root = self._delete(self.root, key)
-
-    def _delete(self, node, key):
-        if node is None:
-            return None
-
-        if key == node.key:
-            self.size -= 1
-            return self._delete_THE_node(node)
-        elif key < node.key:
-            node.left = self._delete(node.left, key)
+        if value == node.value:
+            return node
+        elif value < node.value:
+            node.left = self._insert(node.left, value)
             return node
         else:
-            node.right = self._delete(node.right, key)
+            node.right = self._insert(node.right, value)
+            return node
+
+    def find(self, value):
+        return self._find(self.root, value)
+
+    def _find(self, node, value):
+        if node is None:
+            return False
+
+        if value == node.value:
+            return True
+        elif value > node.value:
+            return self._find(node.right, value)
+        else:
+            return self._find(node.left, value)
+
+    def delete(self, value):
+        self.root = self._delete(self.root, value)
+
+    def _delete(self, node, value):
+        if node is None:
+            return None
+
+        if value == node.value:
+            self.size -= 1
+            return self._delete_THE_node(node)
+        elif value < node.value:
+            node.left = self._delete(node.left, value)
+            return node
+        else:
+            node.right = self._delete(node.right, value)
             return node
 
     def _delete_THE_node(self, node):

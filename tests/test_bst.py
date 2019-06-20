@@ -10,35 +10,34 @@ class TestBinarySearchTree(unittest.TestCase):
         del self.bst
 
     def _construct_trivial_case(self):
-        self.bst.insert(6, 600)
-        self.bst.insert(9, 900)
-        self.bst.insert(4, 400)
-        self.bst.insert(1, 100)
-        self.bst.insert(5, 500)
-        self.bst.insert(3, 300)
-        self.bst.insert(7, 700)
-        self.bst.insert(8, 800)
-        self.bst.insert(2, 200)
+        self.bst.insert(6)
+        self.bst.insert(9)
+        self.bst.insert(4)
+        self.bst.insert(1)
+        self.bst.insert(5)
+        self.bst.insert(3)
+        self.bst.insert(7)
+        self.bst.insert(8)
+        self.bst.insert(2)
 
     def test_insert(self):
-        self.bst.insert(1, 100)
-        self.assertEqual(self.bst.find(1), 100)
+        self.bst.insert(1)
+        self.assertTrue(self.bst.find(1))
         self.assertEqual(len(self.bst), 1)
-        self.bst.insert(1, 200)
-        self.assertEqual(self.bst.find(1), 200)
+        self.bst.insert(1)
         self.assertEqual(len(self.bst), 1)
 
     def test_delete(self):
-        self.bst.insert(1, 100)
-        self.assertEqual(self.bst.find(1), 100)
+        self.bst.insert(1)
+        self.assertTrue(self.bst.find(1))
         self.bst.delete(1)
-        self.assertIsNone(self.bst.find(1))
+        self.assertFalse(self.bst.find(1))
 
     def test_trivial_case(self):
         self._construct_trivial_case()
         self.bst.delete(1)
         self.assertEqual(self.bst.size, 8)
-        self.assertIsNone(self.bst.find(1))
+        self.assertFalse(self.bst.find(1))
 
     def test_incomparable_key_type(self):
         self.bst.insert([])
@@ -63,7 +62,7 @@ class TestBinarySearchTree(unittest.TestCase):
 
     def _test_traverse(self, order, supposed_result):
         self._construct_trivial_case()
-        result = list(map(lambda x: x[0], self.bst.traverse(order)))
+        result = list(self.bst.traverse(order))
         self.assertEqual(result, supposed_result)
 
     def test_height(self):
@@ -77,7 +76,7 @@ class TestBinarySearchTree(unittest.TestCase):
     def test_iterator_type(self):
         self._construct_trivial_case()
         result = list(iter(self.bst))
-        self.assertEqual(result, [(i+1, (i+1)*100) for i in range(9)])
+        self.assertEqual(result, [i+1 for i in range(9)])
 
 
 if __name__ == "__main__":
