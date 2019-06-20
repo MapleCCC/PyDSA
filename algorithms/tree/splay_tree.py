@@ -15,16 +15,104 @@
     Reference: https://www.sciencedirect.com/science/article/pii/0022000082900046
 """
 
-__all__ = ["SplayTree", "SplayTree_Cache"]
+__all__ = ["SplayTree", "SplayTreeWithMaxsize"]
 
-from .bst import BinarySearchTree, Node
-
+from .abstract_tree import BinaryTree, BinaryNode as Node
 
 LEFT = 1
 RIGHT = 0
 
 
-class BSTWithSplayMethod(BinarySearchTree):
+class BottomUpSplayTree(BinaryTree):
+    def insert(self, key, value=None):
+        self._splay(key)
+
+        if self.root is None:
+            self.root = Node(key, value)
+            self.size += 1
+            return
+
+        if key == self.root.key:
+            self.root.value = value
+            return
+
+        if key > self.root.key:
+            new = Node(key, value)
+            new.left = self.root
+            new.right = self.root.right
+            self.root.right = None
+            self.root = new
+            self.size += 1
+            return
+
+        if key < self.root.key:
+            new = Node(key, value)
+            new.right = self.root
+            new.left = self.root.left
+            self.root.left = None
+            self.root = new
+            self.size += 1
+            return
+
+    def delete(self, key):
+        self.root = self._delete(self.root, key)
+
+    def _delete(self, node, key):
+        if node is None:
+            return None
+
+        if key == node.key:
+            self.size -= 1
+            return self._delete_THE_node(node)
+        elif key < node.key:
+            node.left = self._delete(node.left, key)
+            return node
+        else:
+            node.right = self._delete(node.right, key)
+            return node
+
+    def _delete_THE_node(self, node):
+        if node is None:
+            return None
+        if node.left is not None:
+            left_max_node = self._find_max_node(node.left)
+            left_max_node.right = node.right
+            return node.left
+        else:
+            return node.right
+
+    def find_min_node(self):
+        return self._find_min_node(self.root)
+
+    def _find_min_node(self, node):
+        if node is None:
+            return None
+        if node.left is None:
+            return node
+        return self._find_min_node(node.left)
+
+    def find_max_node(self):
+        return self._find_max_node(self.root)
+
+    def _find_max_node(self, node):
+        if node is None:
+            return None
+        if node.right is None:
+            return node
+        else:
+            return self._find_max_node(node.right)
+
+    def find(self, key, value=None):
+        self._splay(key)
+
+        if self.root is None:
+            return None
+
+        if key == self.root.key:
+            return self.root.value
+        else:
+            return None
+
     def _splay(self, key):
         bookkeep = self.track(key)
 
@@ -71,7 +159,7 @@ class BSTWithSplayMethod(BinarySearchTree):
         # Note that we should manipulate node1 and node2's pointer
         # instead of directly reassign themselves
         # because of Python's pass-by-object-reference mechanism
-        self._swap(node1, node2)
+        node1.swap(node2)
 
         if branch == LEFT:
             node1.left = node2.left
@@ -85,10 +173,6 @@ class BSTWithSplayMethod(BinarySearchTree):
             node1.left = node2
         else:
             raise ValueError("Something went wrong.")
-
-    def _swap(self, node1, node2):
-        node1.key, node2.key = node2.key, node1.key
-        node1.value, node2.value = node2.value, node1.value
 
     def track(self, key):
         bookkeep = []
@@ -111,62 +195,15 @@ class BSTWithSplayMethod(BinarySearchTree):
             self._track(node.right, key, bookkeep)
 
 
-class ButtomUpSplayTree(BSTWithSplayMethod):
-    def insert(self, key, value=None):
-        super().insert(key, value)
-        self._splay(key)
-
-    def find(self, key):
-        result = super().find(key)
-        if result is not None:
-            self._splay(key)
-        return result
+# TODO: implement top down splay tree.
+class TopDownSplayTree(BinaryTree):
+    pass
 
 
-class TopDownSplayTree(BSTWithSplayMethod):
-    def insert(self, key, value=None):
-        self._splay(key)
-
-        if self.root is None:
-            self.root = Node(key, value)
-            self.size += 1
-            return
-
-        if key == self.root.key:
-            self.root.value = value
-            return
-
-        if key > self.root.key:
-            new = Node(key, value)
-            new.left = self.root
-            new.right = self.root.right
-            self.root.right = None
-            self.root = new
-            self.size += 1
-            return
-
-        if key < self.root.key:
-            new = Node(key, value)
-            new.right = self.root
-            new.left = self.root.left
-            self.root.left = None
-            self.root = new
-            self.size += 1
-            return
-
-    def find(self, key, value=None):
-        self._splay(key)
-
-        if self.root is None:
-            return None
-
-        if key == self.root.key:
-            return self.root.value
-        else:
-            return None
+SplayTree = BottomUpSplayTree
 
 
-class SplayTree_Cache(TopDownSplayTree):
+class SplayTreeWithMaxsize(SplayTree):
     """
         The more recently used an entry is, the easier to retrieve it.
 
@@ -175,7 +212,7 @@ class SplayTree_Cache(TopDownSplayTree):
         Philosophy is to tradeoff more effort in insertion to save future lookup time. (amortized technique)
         Underlying data structure is splay tree. (linked binary tree)
 
-        Complexity of SplayTree_Cache is same as those of SplayTree, thanks to careful zero-cost abstraction achieved in programming.
+        Complexity of SplayTreeWithMaxsize is same as those of SplayTree, thanks to careful zero-cost abstraction achieved in programming.
 
         Complexity
         ==========
@@ -193,8 +230,6 @@ class SplayTree_Cache(TopDownSplayTree):
 
     def __init__(self, maxsize):
         super().__init__()
-        self.hit = 0
-        self.miss = 0
 
         if maxsize is not None and not isinstance(maxsize, int):
             raise ValueError("Please use integer value for maxsize.")
@@ -298,23 +333,3 @@ class SplayTree_Cache(TopDownSplayTree):
 
         self._update_node_height(node)
         return node
-
-    def find(self, key, value=None):
-        self._splay(key)
-
-        if self.root is None:
-            return None
-
-        if key == self.root.key:
-            self.hit += 1
-            return self.root.value
-        else:
-            self.miss += 1
-            return None
-
-    @property
-    def hit_rate(self):
-        return self.hit/(self.hit+self.miss)
-
-
-SplayTree = TopDownSplayTree

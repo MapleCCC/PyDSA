@@ -1,7 +1,7 @@
 __all__ = ["Cache", "cache_decorator"]
 
 from functools import wraps
-from .tree.splay_tree import SplayTree_Cache
+from .tree.splay_tree import SplayTreeWithMaxsize
 
 
 def calculate_key(*args, **kw):
@@ -191,6 +191,24 @@ class Clock_Cache:
     def __init__(self, maxsize):
         pass
 
+
+class SplayTree_Cache(SplayTreeWithMaxsize):
+    def __init__(self, maxsize):
+        super().__init__(maxsize)
+        self.hit = 0
+        self.miss = 0
+
+    def find(self, key):
+        result = super().find(key)
+        if result is None:
+            self.miss += 1
+        else:
+            self.hit += 1
+        return result
+
+    @property
+    def hit_rate(self):
+        return self.hit/(self.hit+self.miss)
 
 # An implementation trick is we can use age_bit and PriorityQueue to
 # emulate an actual splay tree. Not as efficient as splay tree, but far

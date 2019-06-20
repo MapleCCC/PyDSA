@@ -44,13 +44,12 @@
 
 __all__ = ["BinarySearchTree", "BST"]
 
-import inspect
-import math
-import types
-from collections import OrderedDict
+
 from functools import wraps
 
 from ..queue import Queue
+from ..utils import decorate_all_methods
+from .abstract_tree import BinaryTree, BinaryNode as Node
 
 
 def check_comparable(func):
@@ -69,43 +68,11 @@ def check_comparable(func):
     return wrapper
 
 
-def decorate_all_methods(decorator):
-    def decorate(cls):
-        for name, func in inspect.getmembers(cls):
-            if isinstance(func, types.FunctionType):
-                setattr(cls, name, decorator(func))
-        return cls
-    return decorate
-
-
-class Node:
-    def __init__(self, key, value=None):
-        self.key = key
-        self.value = value
-        self.left = None
-        self.right = None
-
-    def __str__(self):
-        return "Node(key={}, value={})".format(self.key, self.value)
-        # return "({}, {})".format(self.key, self.value)
-
-    def __repr__(self):
-        return self.__str__()
-
-
 @decorate_all_methods(check_comparable)
-class BinarySearchTree:
+class BinarySearchTree(BinaryTree):
     """
         Key should be comparable (and orderable)?
     """
-
-    def __init__(self):
-        self.root = None
-        self.size = 0
-
-    def clear(self):
-        self.root = None
-        self.size = 0
 
     # TODO: make height computation O(1) instead of O(N)
     @property
@@ -116,16 +83,6 @@ class BinarySearchTree:
         if node is None:
             return 0
         return 1 + max(self._height(node.left), self._height(node.right))
-
-    def isEmpty(self):
-        return self.size == 0
-
-    def __len__(self):
-        return self.size
-
-    def __iter__(self):
-        # in_order traversal retrieves nodes in sorted order
-        return iter(self.flatten("in_order").items())
 
     def insert(self, key, value=None):
         self.root = self._insert(self.root, key, value)
@@ -233,6 +190,10 @@ class BinarySearchTree:
         else:
             return self._find_max_node(node.right)
 
+    def __iter__(self):
+        # in_order traversal retrieves nodes in sorted order
+        return iter(self.flatten("in_order").items())
+
     def flatten(self, order="in_order"):
         flattened = OrderedDict()
 
@@ -267,26 +228,6 @@ class BinarySearchTree:
         else:
             raise ValueError("Wrong ordering chosen.")
 
-    def pre_order_traverse(self, func):
-        self._pre_order_traverse(self.root, func)
-
-    def _pre_order_traverse(self, node, func):
-        if node is None:
-            return
-        func(node)
-        self._pre_order_traverse(node.left, func)
-        self._pre_order_traverse(node.right, func)
-
-    def post_order_traverse(self, func):
-        self._post_order_traverse(self.root, func)
-
-    def _post_order_traverse(self, node, func):
-        if node is None:
-            return
-        self._post_order_traverse(node.left, func)
-        self._post_order_traverse(node.right, func)
-        func(node)
-
     def in_order_traverse(self, func):
         self._in_order_traverse(self.root, func)
 
@@ -306,47 +247,6 @@ class BinarySearchTree:
         self._out_order_traverse(node.right, func)
         func(node)
         self._out_order_traverse(node.left, func)
-
-    def breadth_first_order_traverse(self, func):
-        q = Queue()
-        q.enqueue(self.root)
-        while not q.isEmpty():
-            node = q.dequeue()
-            if node is not None:
-                func(node)
-                q.enqueue(node.left)
-                q.enqueue(node.right)
-
-    # def __str__(self):
-    #     q = Queue()
-
-    #     def log(node):
-    #         q.enqueue(node.key)
-    #     self.traverse(log, order="pre_order")
-
-    #     h = self.height
-
-    #     node_num_of_full_tree = 2 ** h - 1
-    #     res = node_num_of_full_tree - q.size
-    #     for _ in range(res):
-    #         q.enqueue(' ')
-    #     print("\n")
-    #     for n in range(h):
-    #         margin = ' ' * (3 * h - 3 * n - 2)
-    #         interval = ' ' * 5
-    #         s = margin
-    #         for _ in range(2 ** n):
-    #             s += str(q.dequeue()) + interval
-    #         s = s[:-5]
-    #         s += margin
-    #         print(s)
-    #     print("\n")
-
-    # def __repr__(self):
-    #     return self.__str__()
-
-    # def visualize(self):
-    #     print(self.__str__())
 
 
 # Alias

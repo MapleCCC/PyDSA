@@ -16,18 +16,7 @@ __all__ = ['Heap']
 
 
 from math import floor
-
-
-class Node:
-    def __init__(self, key, value=None):
-        self.key = key
-        self.value = value
-
-    def __lt__(self, node):
-        return self.key < node.key
-
-    def __gt__(self, node):
-        return self.key > node.key
+from .tree.abstract_tree import BinaryNode as Node
 
 
 class InverseNode(Node):
