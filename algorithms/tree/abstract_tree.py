@@ -47,6 +47,7 @@ class Tree:
     def clear(self):
         self._root = None
         self._size = 0
+        return self
 
     @property
     def root(self):
