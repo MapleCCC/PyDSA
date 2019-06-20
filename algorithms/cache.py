@@ -31,8 +31,8 @@ def calculate_key(*args, **kw):
 
 def cache_decorator(algorithm="LRU", maxsize=None):
     """
-    Decorator.
-    Arguments to the user function must be hashale.
+        Decorator.
+        Arguments to the user function must be hashable.
     """
     def decorator(user_function):
         cache = Cache(algorithm, maxsize)
@@ -106,16 +106,22 @@ class Cache:
 
 class LRU_Cache:
     """
-    Accessing every item is equally fast. The size is limited. When cache is full, further insertion requires that the least recently used item is discarded.
+        Accessing every item is equally fast. The size is limited. When cache is full, further insertion requires that the least recently used item is discarded.
 
-    Advantage: quick access to any items.
-    Disadvantage: relatively limited size.
-    Philosophy is to tradeoff time with space.
-    Underlying data structure is hash table. (dictionary primitive data type in Python)
+        Advantage: quick access to any items.
+        Disadvantage: relatively limited size.
+        Philosophy is to tradeoff time with space.
+        Underlying data structure is hash table. (dictionary primitive data type in Python)
 
-    Reference to the *LRU cache mechanism* part in the source code of the `functools` standard library.
+        Reference to the *LRU cache mechanism* part in the source code of the `functools` standard library.
 
-    Use class level property instead of object level property. This is for persistent cache data through program lifetime.
+        Complexity
+        ----------
+        | Operation | Complexity |
+        ==========================
+        | insert | O(1) |
+        | delete | O(N) |
+        | find | O(1) |
     """
 
     def __init__(self, maxsize=128):

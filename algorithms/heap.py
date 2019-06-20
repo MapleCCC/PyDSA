@@ -14,6 +14,7 @@ __________________________
 
 __all__ = ['Heap']
 
+
 from math import floor
 
 
@@ -29,12 +30,16 @@ class Node:
         return self.key > node.key
 
 
-class RevNode(Node):
+class InverseNode(Node):
+    """
+        Resembled inverse particle in physics, i.e. it has opposite behaviors with its counterpart.
+    """
+
     def __lt__(self, node):
-        return self.key > node.key
+        return super().__gt__(node)
 
     def __gt__(self, node):
-        return self.key < node.key
+        return super().__lt__(node)
 
 
 class Heap:
@@ -50,7 +55,7 @@ class Heap:
             if self.priority_order == "min":
                 node = Node(key, value)
             elif self.priority_order == "max":
-                node = RevNode(key, value)
+                node = InverseNode(key, value)
             self._heap.append(node)
             new_node_index = self.size - 1
             self._try_move_up(new_node_index)

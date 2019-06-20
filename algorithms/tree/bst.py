@@ -1,32 +1,63 @@
 """
-BinarySearchTree
+    BinarySearchTree
 
-Complexity:
-| Operation | Complexity |
-----------------------
-| insert() | O(H) |
-| find() | O(H) |
-| delete() | O(H) |
-| get size | O(1) |
-| get height | O(N) |
+    Interface:
+    ==========
+    insert(key, value): `value` defaults to `None`.
+    delete(key)
+    find(key): Return matched value, or `None` if not found.
+    traverse(func, order): `func` takes `key` and `value` as parameters. `order` can be one of `pre_order`, `post_order`, in_order`, `out_order`, or `breadth_first_order`.
+    flatten(order): Similar to `traverse()` but return an `OrderedDict`.
+    isEmpty()
+    height()
+    clear()
+    size
 
-where H denotes tree height, which is in average O(logN), where N is number of nodes.
+    Private helper methods: (DON'T use them in user code!)
+    ==================
+    find_min_node
+    find_max_node
+    delete_min_node
+    delete_max_node
+
+    Methods prefixed with underscore are private helper methods.
+    They are not intended for public exposure or usage out of its containing scope.
+    Their implementation detail might be subject to change in the future.
+    It's recommended to adhere to API explicitly provided.
+
+
+    Complexity:
+    ===========
+    | Operation | Complexity |
+    ----------------------
+    | insert() | O(H) |
+    | find() | O(H) |
+    | delete() | O(H) |
+    | traverse() | O(N) |
+    | clear() | O(1) |
+    | get size | O(1) |
+    | get height | O(N) |
+
+    where N is number of nodes.
+    where H denotes tree height, which is in average O(logN). Reference: https://www.sciencedirect.com/science/article/pii/0022000082900046
 """
 
 __all__ = ["BinarySearchTree", "BST"]
 
 import inspect
-import types
 import math
+import types
 from collections import OrderedDict
+from functools import wraps
+
 from ..queue import Queue
-from ..stack import Stack
 
 
 def check_comparable(func):
     error_messages = {"'<' not supported", "'>' not supported",
                       "'==' not supported", "'>=' not supported", "'<=' not supported"}
 
+    @wraps(func)
     def wrapper(*args, **kw):
         try:
             return func(*args, **kw)
@@ -65,10 +96,14 @@ class Node:
 @decorate_all_methods(check_comparable)
 class BinarySearchTree:
     """
-    key should be comparable
+        Key should be comparable (and orderable)?
     """
 
     def __init__(self):
+        self.root = None
+        self.size = 0
+
+    def clear(self):
         self.root = None
         self.size = 0
 
@@ -160,6 +195,7 @@ class BinarySearchTree:
         if node is None:
             return None
         if node.left is None:
+            self.size -= 1
             return None
         node.left = self._delete_min_node(node.left)
         return node
@@ -171,13 +207,10 @@ class BinarySearchTree:
         if node is None:
             return None
         if node.right is None:
+            self.size -= 1
             return None
         node.right = self._delete_max_node(node.right)
         return node
-
-    def clear(self):
-        self.root = None
-        self.size = 0
 
     def find_min_node(self):
         return self._find_min_node(self.root)
@@ -210,7 +243,7 @@ class BinarySearchTree:
 
     def traverse(self, func, order="in_order"):
         """
-        func takes two parameters: key, value
+            func takes two parameters: key, value
         """
         def wrapper(node):
             return func(node.key, node.value)
@@ -219,7 +252,7 @@ class BinarySearchTree:
 
     def _traverse(self, func, order="in_order"):
         """
-        func takes one parameter: node
+            func takes one parameter: node
         """
         if order == "pre_order":
             self.pre_order_traverse(func)
@@ -284,7 +317,7 @@ class BinarySearchTree:
                 q.enqueue(node.left)
                 q.enqueue(node.right)
 
-    # def visualize(self):
+    # def __str__(self):
     #     q = Queue()
 
     #     def log(node):
@@ -299,7 +332,7 @@ class BinarySearchTree:
     #         q.enqueue(' ')
     #     print("\n")
     #     for n in range(h):
-    #         margin = ' ' * (3 * h - 3 * n -2)
+    #         margin = ' ' * (3 * h - 3 * n - 2)
     #         interval = ' ' * 5
     #         s = margin
     #         for _ in range(2 ** n):
@@ -308,6 +341,12 @@ class BinarySearchTree:
     #         s += margin
     #         print(s)
     #     print("\n")
+
+    # def __repr__(self):
+    #     return self.__str__()
+
+    # def visualize(self):
+    #     print(self.__str__())
 
 
 # Alias

@@ -1,3 +1,20 @@
+"""
+    SplayTree
+
+    Complexity
+    ==========
+    | Operation | Complexity |
+    --------------------------
+    | insert | O(H) |
+    | delete | O(H) |
+    | find | O(H) |
+    | splay | O(H) |
+    | get size | O(1) |
+
+    where H denotes tree height, which is in average O(logN), where N is number of tree nodes.
+    Reference: https://www.sciencedirect.com/science/article/pii/0022000082900046
+"""
+
 __all__ = ["SplayTree", "SplayTree_Cache"]
 
 from .bst import BinarySearchTree, Node
@@ -157,6 +174,21 @@ class SplayTree_Cache(TopDownSplayTree):
         Disadvantage: uneven access time for different stored data.
         Philosophy is to tradeoff more effort in insertion to save future lookup time. (amortized technique)
         Underlying data structure is splay tree. (linked binary tree)
+
+        Complexity of SplayTree_Cache is same as those of SplayTree, thanks to careful zero-cost abstraction achieved in programming.
+
+        Complexity
+        ==========
+        | Operation | Complexity |
+        --------------------------
+        | insert | O(H) |
+        | delete | O(H) |
+        | find | O(H) |
+        | splay | O(H) |
+        | get size | O(1) |
+
+        where H denotes tree height, which is in average O(logN), where N is number of tree nodes.
+        Reference: https://www.sciencedirect.com/science/article/pii/0022000082900046
     """
 
     def __init__(self, maxsize):
