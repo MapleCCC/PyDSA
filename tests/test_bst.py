@@ -22,22 +22,22 @@ class TestBinarySearchTree(unittest.TestCase):
 
     def test_insert(self):
         self.bst.insert(1)
-        self.assertTrue(self.bst.find(1))
+        self.assertTrue(self.bst.search(1))
         self.assertEqual(len(self.bst), 1)
         self.bst.insert(1)
         self.assertEqual(len(self.bst), 1)
 
     def test_delete(self):
         self.bst.insert(1)
-        self.assertTrue(self.bst.find(1))
+        self.assertTrue(self.bst.search(1))
         self.bst.delete(1)
-        self.assertFalse(self.bst.find(1))
+        self.assertFalse(self.bst.search(1))
 
     def test_trivial_case(self):
         self._construct_trivial_case()
         self.bst.delete(1)
         self.assertEqual(self.bst.size, 8)
-        self.assertFalse(self.bst.find(1))
+        self.assertFalse(self.bst.search(1))
 
     def test_incomparable_key_type(self):
         self.bst.insert([])
@@ -71,7 +71,7 @@ class TestBinarySearchTree(unittest.TestCase):
         self.assertEqual(self.bst.height, 5)
         # Should not test height after any deletion operation.
         # Unlike insertion operation, which lead to deterministic tree layout.
-        # deletion operation have non-unique implementation approach that could lead to different tree layout afterwards.
+        # deletion operation have non-unique implementation approach (up to concrete implementation algorithm) that could lead to different tree layout afterwards.
 
     def test_iterator_type(self):
         self._construct_trivial_case()

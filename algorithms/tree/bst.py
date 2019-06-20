@@ -3,22 +3,18 @@
 
     Interface:
     ==========
-    insert(key, value): `value` defaults to `None`.
-    delete(key)
-    find(key): Return matched value, or `None` if not found.
-    traverse(func, order): `func` takes `key` and `value` as parameters. `order` can be one of `pre_order`, `post_order`, in_order`, `out_order`, or `breadth_first_order`.
-    flatten(order): Similar to `traverse()` but return an `OrderedDict`.
+    insert(value)
+    delete(value)
+    search(value): Return True if found and False otherwise.
+    traverse(order): `order` can be one of `pre_order`, `post_order`, in_order`, `out_order`, or `breadth_first_order`.
     isEmpty()
-    height()
+    height
     clear()
     size
 
     Private helper methods: (DON'T use them in user code!)
     ==================
-    find_min_node
-    find_max_node
-    delete_min_node
-    delete_max_node
+    [......]
 
     Methods prefixed with underscore are private helper methods.
     They are not intended for public exposure or usage out of its containing scope.
@@ -31,12 +27,12 @@
     | Operation | Complexity |
     ----------------------
     | insert() | O(H) |
-    | find() | O(H) |
+    | search() | O(H) |
     | delete() | O(H) |
     | traverse() | O(N) |
     | clear() | O(1) |
-    | get size | O(1) |
-    | get height | O(N) |
+    | size | O(1) |
+    | height | O(N) |
 
     where N is number of nodes.
     where H denotes tree height, which is in average O(logN). Reference: https://www.sciencedirect.com/science/article/pii/0022000082900046
@@ -76,17 +72,17 @@ class BinarySearchTree(BinaryTree):
     # TODO: make height computation O(1) instead of O(N)
     @property
     def height(self):
-        return self._height(self._root)
+        return self.recur_height(self._root)
 
-    def _height(self, node):
+    def recur_height(self, node):
         if node is None:
             return 0
-        return 1 + max(self._height(node.left), self._height(node.right))
+        return 1 + max(self.recur_height(node.left), self.recur_height(node.right))
 
     def insert(self, value):
-        self._root = self._insert(self._root, value)
+        self._root = self.recur_insert(self._root, value)
 
-    def _insert(self, node, value):
+    def recur_insert(self, node, value):
         if node is None:
             self._size += 1
             return Node(value)
@@ -94,30 +90,30 @@ class BinarySearchTree(BinaryTree):
         if value == node.value:
             return node
         elif value < node.value:
-            node.left = self._insert(node.left, value)
+            node.left = self.recur_insert(node.left, value)
             return node
         else:
-            node.right = self._insert(node.right, value)
+            node.right = self.recur_insert(node.right, value)
             return node
 
-    def find(self, value):
-        return self._find(self._root, value)
+    def search(self, value):
+        return self.recur_search(self._root, value)
 
-    def _find(self, node, value):
+    def recur_search(self, node, value):
         if node is None:
             return False
 
         if value == node.value:
             return True
         elif value > node.value:
-            return self._find(node.right, value)
+            return self.recur_search(node.right, value)
         else:
-            return self._find(node.left, value)
+            return self.recur_search(node.left, value)
 
     def delete(self, value):
-        self._root = self._delete(self._root, value)
+        self._root = self.recur_delete(self._root, value)
 
-    def _delete(self, node, value):
+    def recur_delete(self, node, value):
         if node is None:
             return None
 
@@ -135,10 +131,10 @@ class BinarySearchTree(BinaryTree):
             else:
                 return node.right
         elif value < node.value:
-            node.left = self._delete(node.left, value)
+            node.left = self.recur_delete(node.left, value)
             return node
         else:
-            node.right = self._delete(node.right, value)
+            node.right = self.recur_delete(node.right, value)
             return node
 
     default_traversal_order = "in_order"
@@ -147,24 +143,24 @@ class BinarySearchTree(BinaryTree):
         """
             `in_order` traversal retrieves nodes in sorted order
         """
-        return self._in_order_traverse(self._root)
+        return self.recur_in_order_traverse(self._root)
 
-    def _in_order_traverse(self, node):
+    def recur_in_order_traverse(self, node):
         if node is None:
             return
-        yield from self._in_order_traverse(node.left)
+        yield from self.recur_in_order_traverse(node.left)
         yield node
-        yield from self._in_order_traverse(node.right)
+        yield from self.recur_in_order_traverse(node.right)
 
     def out_order_traverse(self):
-        return self._out_order_traverse(self._root)
+        return self.recur_out_order_traverse(self._root)
 
-    def _out_order_traverse(self, node):
+    def recur_out_order_traverse(self, node):
         if node is None:
             return
-        yield from self._out_order_traverse(node.right)
+        yield from self.recur_out_order_traverse(node.right)
         yield node
-        yield from self._out_order_traverse(node.left)
+        yield from self.recur_out_order_traverse(node.left)
 
 
 # Alias
