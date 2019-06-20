@@ -24,20 +24,19 @@ RIGHT = 0
 
 
 class BottomUpSplayTree(BinaryTree):
-    def insert(self, key, value=None):
-        self._splay(key)
+    def insert(self, value):
+        self._splay(value)
 
         if self.root is None:
-            self.root = Node(key, value)
+            self.root = Node(value)
             self.size += 1
             return
 
-        if key == self.root.key:
-            self.root.value = value
+        if value == self.root.value:
             return
 
-        if key > self.root.key:
-            new = Node(key, value)
+        if value > self.root.value:
+            new = Node(value)
             new.left = self.root
             new.right = self.root.right
             self.root.right = None
@@ -45,8 +44,8 @@ class BottomUpSplayTree(BinaryTree):
             self.size += 1
             return
 
-        if key < self.root.key:
-            new = Node(key, value)
+        if value < self.root.value:
+            new = Node(value)
             new.right = self.root
             new.left = self.root.left
             self.root.left = None
@@ -54,21 +53,21 @@ class BottomUpSplayTree(BinaryTree):
             self.size += 1
             return
 
-    def delete(self, key):
-        self.root = self._delete(self.root, key)
+    def delete(self, value):
+        self.root = self._delete(self.root, value)
 
-    def _delete(self, node, key):
+    def _delete(self, node, value):
         if node is None:
             return None
 
-        if key == node.key:
+        if value == node.value:
             self.size -= 1
             return self._delete_THE_node(node)
-        elif key < node.key:
-            node.left = self._delete(node.left, key)
+        elif value < node.value:
+            node.left = self._delete(node.left, value)
             return node
         else:
-            node.right = self._delete(node.right, key)
+            node.right = self._delete(node.right, value)
             return node
 
     def _delete_THE_node(self, node):
@@ -102,22 +101,22 @@ class BottomUpSplayTree(BinaryTree):
         else:
             return self._find_max_node(node.right)
 
-    def find(self, key, value=None):
-        self._splay(key)
+    def find(self, value):
+        self._splay(value)
 
         if self.root is None:
-            return None
+            return False
 
-        if key == self.root.key:
-            return self.root.value
+        if value == self.root.value:
+            return True
         else:
-            return None
+            return False
 
-    def _splay(self, key):
-        bookkeep = self.track(key)
+    def _splay(self, value):
+        bookkeep = self.track(value)
 
         if bookkeep[-1] is None:
-            # if the key cannot be found, splay last visited node instead.
+            # if the value cannot be found, splay last visited node instead.
             # Such strategy is for some implementation methods of `insert` and `find`
             path_nodes = bookkeep[:-2]
         else:
@@ -174,25 +173,25 @@ class BottomUpSplayTree(BinaryTree):
         else:
             raise ValueError("Something went wrong.")
 
-    def track(self, key):
+    def track(self, value):
         bookkeep = []
-        self._track(self.root, key, bookkeep)
+        self._track(self.root, value, bookkeep)
         return bookkeep
 
-    def _track(self, node, key, bookkeep):
+    def _track(self, node, value, bookkeep):
         if node is None:
             bookkeep.append(node)
             return
 
-        if key == node.key:
+        if value == node.value:
             bookkeep.append(node)
             return
-        elif key < node.key:
+        elif value < node.value:
             bookkeep += [node, LEFT]
-            self._track(node.left, key, bookkeep)
+            self._track(node.left, value, bookkeep)
         else:
             bookkeep += [node, RIGHT]
-            self._track(node.right, key, bookkeep)
+            self._track(node.right, value, bookkeep)
 
 
 # TODO: implement top down splay tree.
