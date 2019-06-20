@@ -63,11 +63,7 @@ class TestBinarySearchTree(unittest.TestCase):
 
     def _test_traverse(self, order, supposed_result):
         self._construct_trivial_case()
-        result = []
-
-        def log(key, value):
-            result.append(key)
-        self.bst.traverse(log, order)
+        result = list(map(lambda x: x[0], self.bst.traverse(order)))
         self.assertEqual(result, supposed_result)
 
     def test_height(self):
@@ -80,9 +76,7 @@ class TestBinarySearchTree(unittest.TestCase):
 
     def test_iterator_type(self):
         self._construct_trivial_case()
-        result = []
-        for k, v in self.bst:
-            result.append((k, v))
+        result = list(iter(self.bst))
         self.assertEqual(result, [(i+1, (i+1)*100) for i in range(9)])
 
 

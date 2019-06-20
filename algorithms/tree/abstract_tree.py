@@ -71,42 +71,60 @@ class Tree:
     def __repr__(self):
         return str(self)
 
-    def pre_order_traverse(self, func):
-        """
-            func takes one parameter: node
-        """
-        self._pre_order_traverse(self.root, func)
+    def __iter__(self):
+        return self.traverse()
 
-    def _pre_order_traverse(self, node, func):
+    # traversal returns an iterator, utilize power of lazy evaluation to save space and reduce overhead.
+    def traverse(self, order=None):
+        """
+            'Generator Factory' pattern
+            Calling this function will return a generator.
+            Iterating over the generator will retrieve the tree node in given order.
+            Note that the retrieval is real-time, which means altering the tree between two consecutive generator call may result in different results.
+        """
+        if order is None:
+            order = self.__class__.default_traversal_order
+
+        for node in self._traverse(order):
+            yield (node.key, node.value)
+
+    default_traversal_order = "breadth_first_order"
+
+    def _traverse(self, order):
+        if not isinstance(order, str):
+            raise ValueError("`order` should be string.")
+        try:
+            return getattr(self, order+"_traverse")()
+        except AttributeError:
+            raise ValueError("Wrong ordering chosen.")
+
+    def pre_order_traverse(self):
+        return self._pre_order_traverse(self.root)
+
+    def _pre_order_traverse(self, node):
         if node is None:
             return
-        func(node)
+        yield node
         for child in node.children:
-            self._pre_order_traverse(child, func)
+            yield from self._pre_order_traverse(child)
 
-    def post_order_traverse(self, func):
-        """
-            func takes one parameter: node
-        """
-        self._post_order_traverse(self.root, func)
+    def post_order_traverse(self):
+        return self._post_order_traverse(self.root)
 
-    def _post_order_traverse(self, node, func):
+    def _post_order_traverse(self, node):
         if node is None:
             return
         for child in node.children:
-            self._post_order_traverse(child, func)
-        func(node)
+            yield from self._post_order_traverse(child)
+        yield node
 
-    def breadth_first_order_traverse(self, func):
-        """
-            func takes one parameter: node
-        """
+    def breadth_first_order_traverse(self):
         q = Queue()
         q.enqueue(self.root)
         while not q.isEmpty():
             node = q.dequeue()
             if node is not None:
-                func(node)
+                yield node
                 for child in node.children:
                     q.enqueue(child)
 
@@ -190,6 +208,6 @@ if __name__ == '__main__':
     tree2.root = Node(0, 0)
     tree2.root.children = [Node(0, 4), Node(0, 2), Node(0, 3)]
 
-    tree1.pre_order_traverse(lambda x: print(x.value))
+    print(list(tree1.pre_order_traverse()))
     print(tree1)
     print(tree2)

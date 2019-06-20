@@ -47,7 +47,6 @@ __all__ = ["BinarySearchTree", "BST"]
 
 from functools import wraps
 
-from ..queue import Queue
 from ..utils import decorate_all_methods
 from .abstract_tree import BinaryTree, BinaryNode as Node
 
@@ -190,63 +189,30 @@ class BinarySearchTree(BinaryTree):
         else:
             return self._find_max_node(node.right)
 
-    def __iter__(self):
-        # in_order traversal retrieves nodes in sorted order
-        return iter(self.flatten("in_order").items())
+    default_traversal_order = "in_order"
 
-    def flatten(self, order="in_order"):
-        flattened = OrderedDict()
-
-        def log(key, value):
-            flattened[key] = value
-        self.traverse(log, order)
-        return flattened
-
-    def traverse(self, func, order="in_order"):
+    def in_order_traverse(self):
         """
-            func takes two parameters: key, value
+            `in_order` traversal retrieves nodes in sorted order
         """
-        def wrapper(node):
-            return func(node.key, node.value)
+        return self._in_order_traverse(self.root)
 
-        return self._traverse(wrapper, order)
-
-    def _traverse(self, func, order="in_order"):
-        """
-            func takes one parameter: node
-        """
-        if order == "pre_order":
-            self.pre_order_traverse(func)
-        elif order == "post_order":
-            self.post_order_traverse(func)
-        elif order == "in_order":
-            self.in_order_traverse(func)
-        elif order == "out_order":
-            self.out_order_traverse(func)
-        elif order == "breadth_first_order":
-            self.breadth_first_order_traverse(func)
-        else:
-            raise ValueError("Wrong ordering chosen.")
-
-    def in_order_traverse(self, func):
-        self._in_order_traverse(self.root, func)
-
-    def _in_order_traverse(self, node, func):
+    def _in_order_traverse(self, node):
         if node is None:
             return
-        self._in_order_traverse(node.left, func)
-        func(node)
-        self._in_order_traverse(node.right, func)
+        yield from self._in_order_traverse(node.left)
+        yield node
+        yield from self._in_order_traverse(node.right)
 
-    def out_order_traverse(self, func):
-        self._out_order_traverse(self.root, func)
+    def out_order_traverse(self):
+        return self._out_order_traverse(self.root)
 
-    def _out_order_traverse(self, node, func):
+    def _out_order_traverse(self, node):
         if node is None:
             return
-        self._out_order_traverse(node.right, func)
-        func(node)
-        self._out_order_traverse(node.left, func)
+        yield from self._out_order_traverse(node.right)
+        yield node
+        yield from self._out_order_traverse(node.left)
 
 
 # Alias
