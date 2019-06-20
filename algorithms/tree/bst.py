@@ -44,7 +44,7 @@ __all__ = ["BinarySearchTree", "BST"]
 from functools import wraps
 
 from ..utils import decorate_all_methods
-from .abstract_tree import BinaryTree, BinaryNode as Node
+from .abstract_tree import BinaryTree, BinaryNode as Node, BinaryNullNode as NullNode
 
 
 def check_comparable(func):
@@ -75,7 +75,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_height(self._root)
 
     def recur_height(self, node):
-        if node is None:
+        if node is NullNode:
             return 0
         return 1 + max(self.recur_height(node.left), self.recur_height(node.right))
 
@@ -84,9 +84,10 @@ class BinarySearchTree(BinaryTree):
         return self
 
     def recur_insert(self, node, value):
-        if node is None:
+        if node is NullNode:
             self._size += 1
-            return Node(value)
+            node.value = value
+            return node
 
         if value == node.value:
             return node
@@ -101,7 +102,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_search(self._root, value)
 
     def recur_search(self, node, value):
-        if node is None:
+        if node is NullNode:
             return False
 
         if value == node.value:
@@ -116,18 +117,18 @@ class BinarySearchTree(BinaryTree):
         return self
 
     def recur_delete(self, node, value):
-        if node is None:
-            return None
+        if node is NullNode:
+            return NullNode
 
         if value == node.value:
             self._size -= 1
-            if node.left is not None:
+            if node.left is not NullNode:
                 itr = node.left
                 prev = node
-                while itr.left is not None:
+                while itr.left is not NullNode:
                     prev = itr
                     itr = itr.left
-                prev.left = None
+                prev.left = NullNode
                 node.value = itr.value
                 return node
             else:
@@ -148,7 +149,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_in_order_traverse(self._root)
 
     def recur_in_order_traverse(self, node):
-        if node is None:
+        if node is NullNode:
             return
         yield from self.recur_in_order_traverse(node.left)
         yield node
@@ -158,7 +159,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_out_order_traverse(self._root)
 
     def recur_out_order_traverse(self, node):
-        if node is None:
+        if node is NullNode:
             return
         yield from self.recur_out_order_traverse(node.right)
         yield node

@@ -39,6 +39,10 @@ class Node:
         self.value, node.value = node.value, self.value
 
 
+# A unique sentinel
+NullNode = Node(None)
+
+
 class Tree:
     def __init__(self):
         self._root = None
@@ -51,8 +55,6 @@ class Tree:
 
     @property
     def root(self):
-        if self._root is None:
-            return None
         return self._root.value
 
     @property
@@ -69,8 +71,6 @@ class Tree:
         return self._recursive_str(self._root)
 
     def _recursive_str(self, node):
-        if node is None:
-            return 'None'
         if len(node.children) == 0:
             return "Node(value={})".format(node.value)
         else:
@@ -110,7 +110,7 @@ class Tree:
         return self._pre_order_traverse(self._root)
 
     def _pre_order_traverse(self, node):
-        if node is None:
+        if node is NullNode:
             return
         yield node
         for child in node.children:
@@ -120,7 +120,7 @@ class Tree:
         return self._post_order_traverse(self._root)
 
     def _post_order_traverse(self, node):
-        if node is None:
+        if node is NullNode:
             return
         for child in node.children:
             yield from self._post_order_traverse(child)
@@ -131,7 +131,7 @@ class Tree:
         q.enqueue(self._root)
         while not q.isEmpty():
             node = q.dequeue()
-            if node is not None:
+            if node is not NullNode:
                 yield node
                 for child in node.children:
                     q.enqueue(child)
@@ -162,10 +162,13 @@ class Tree:
     #     print("\n")
 
 
+M_aryNullNode = M_aryNode(None)
+
+
 class M_aryNode(Node):
     def __init__(self, value, branch=2):
         super().__init__(value)
-        self.children = [None] * branch
+        self.children = [M_aryNullNode] * branch
 
 
 class M_aryTree(Tree):
@@ -174,6 +177,11 @@ class M_aryTree(Tree):
         if not isinstance(m, int) or m <= 0:
             raise ValueError("Valid branch number is a natural number.")
         self.branch = m
+
+
+# Sentinel
+BinaryNullNode = BinaryNode(None)
+BinaryNullNode.left = BinaryNullNode.right = BinaryNullNode
 
 
 class BinaryNode(M_aryNode):
@@ -186,7 +194,7 @@ class BinaryNode(M_aryNode):
 
     @left.setter
     def left(self, node):
-        if not isinstance(node, (Node, type(None))):
+        if not isinstance(node, BinaryNode) or node is not BinaryNullNode:
             raise ValueError
         self.children[0] = node
 
@@ -196,7 +204,7 @@ class BinaryNode(M_aryNode):
 
     @right.setter
     def right(self, node):
-        if not isinstance(node, (Node, type(None))):
+        if not isinstance(node, BinaryNode) or node is not BinaryNullNode:
             raise ValueError
         self.children[1] = node
 
