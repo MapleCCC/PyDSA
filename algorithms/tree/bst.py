@@ -76,7 +76,7 @@ class BinarySearchTree(BinaryTree):
     # TODO: make height computation O(1) instead of O(N)
     @property
     def height(self):
-        return self._height(self.root)
+        return self._height(self._root)
 
     def _height(self, node):
         if node is None:
@@ -84,7 +84,7 @@ class BinarySearchTree(BinaryTree):
         return 1 + max(self._height(node.left), self._height(node.right))
 
     def insert(self, value):
-        self.root = self._insert(self.root, value)
+        self._root = self._insert(self._root, value)
 
     def _insert(self, node, value):
         if node is None:
@@ -101,7 +101,7 @@ class BinarySearchTree(BinaryTree):
             return node
 
     def find(self, value):
-        return self._find(self.root, value)
+        return self._find(self._root, value)
 
     def _find(self, node, value):
         if node is None:
@@ -115,7 +115,7 @@ class BinarySearchTree(BinaryTree):
             return self._find(node.left, value)
 
     def delete(self, value):
-        self.root = self._delete(self.root, value)
+        self._root = self._delete(self._root, value)
 
     def _delete(self, node, value):
         if node is None:
@@ -142,7 +142,7 @@ class BinarySearchTree(BinaryTree):
             return node.right
 
     def delete_min_node(self):
-        self.root = self._delete_min_node(self.root)
+        self._root = self._delete_min_node(self._root)
 
     def _delete_min_node(self, node):
         if node is None:
@@ -154,7 +154,7 @@ class BinarySearchTree(BinaryTree):
         return node
 
     def delete_max_node(self):
-        self.root = self._delete_max_node(self.root)
+        self._root = self._delete_max_node(self._root)
 
     def _delete_max_node(self, node):
         if node is None:
@@ -166,7 +166,7 @@ class BinarySearchTree(BinaryTree):
         return node
 
     def find_min_node(self):
-        return self._find_min_node(self.root)
+        return self._find_min_node(self._root)
 
     def _find_min_node(self, node):
         if node is None:
@@ -176,7 +176,7 @@ class BinarySearchTree(BinaryTree):
         return self._find_min_node(node.left)
 
     def find_max_node(self):
-        return self._find_max_node(self.root)
+        return self._find_max_node(self._root)
 
     def _find_max_node(self, node):
         if node is None:
@@ -192,7 +192,7 @@ class BinarySearchTree(BinaryTree):
         """
             `in_order` traversal retrieves nodes in sorted order
         """
-        return self._in_order_traverse(self.root)
+        return self._in_order_traverse(self._root)
 
     def _in_order_traverse(self, node):
         if node is None:
@@ -202,7 +202,7 @@ class BinarySearchTree(BinaryTree):
         yield from self._in_order_traverse(node.right)
 
     def out_order_traverse(self):
-        return self._out_order_traverse(self.root)
+        return self._out_order_traverse(self._root)
 
     def _out_order_traverse(self, node):
         if node is None:

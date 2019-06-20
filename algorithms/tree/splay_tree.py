@@ -27,34 +27,34 @@ class BottomUpSplayTree(BinaryTree):
     def insert(self, value):
         self._splay(value)
 
-        if self.root is None:
-            self.root = Node(value)
+        if self._root is None:
+            self._root = Node(value)
             self.size += 1
             return
 
-        if value == self.root.value:
+        if value == self._root.value:
             return
 
-        if value > self.root.value:
+        if value > self._root.value:
             new = Node(value)
-            new.left = self.root
-            new.right = self.root.right
-            self.root.right = None
-            self.root = new
+            new.left = self._root
+            new.right = self._root.right
+            self._root.right = None
+            self._root = new
             self.size += 1
             return
 
-        if value < self.root.value:
+        if value < self._root.value:
             new = Node(value)
-            new.right = self.root
-            new.left = self.root.left
-            self.root.left = None
-            self.root = new
+            new.right = self._root
+            new.left = self._root.left
+            self._root.left = None
+            self._root = new
             self.size += 1
             return
 
     def delete(self, value):
-        self.root = self._delete(self.root, value)
+        self._root = self._delete(self._root, value)
 
     def _delete(self, node, value):
         if node is None:
@@ -81,7 +81,7 @@ class BottomUpSplayTree(BinaryTree):
             return node.right
 
     def find_min_node(self):
-        return self._find_min_node(self.root)
+        return self._find_min_node(self._root)
 
     def _find_min_node(self, node):
         if node is None:
@@ -91,7 +91,7 @@ class BottomUpSplayTree(BinaryTree):
         return self._find_min_node(node.left)
 
     def find_max_node(self):
-        return self._find_max_node(self.root)
+        return self._find_max_node(self._root)
 
     def _find_max_node(self, node):
         if node is None:
@@ -104,10 +104,10 @@ class BottomUpSplayTree(BinaryTree):
     def find(self, value):
         self._splay(value)
 
-        if self.root is None:
+        if self._root is None:
             return False
 
-        if value == self.root.value:
+        if value == self._root.value:
             return True
         else:
             return False
@@ -175,7 +175,7 @@ class BottomUpSplayTree(BinaryTree):
 
     def track(self, value):
         bookkeep = []
-        self._track(self.root, value, bookkeep)
+        self._track(self._root, value, bookkeep)
         return bookkeep
 
     def _track(self, node, value, bookkeep):
@@ -244,12 +244,12 @@ class SplayTreeWithMaxsize(SplayTree):
 
     def insert(self, key, value=None):
         super().insert(key, value)
-        if self.root is None:
+        if self._root is None:
             return
 
-        self._update_node_height(self.root.left)
-        self._update_node_height(self.root.right)
-        self._update_node_height(self.root)
+        self._update_node_height(self._root.left)
+        self._update_node_height(self._root.right)
+        self._update_node_height(self._root)
 
         if self.size > self.maxsize:
             self.delete_deepest_node()
@@ -268,7 +268,7 @@ class SplayTreeWithMaxsize(SplayTree):
             node.height = max(node.left.height, node.right.height) + 1
 
     def delete(self, key):
-        self.root = self._delete(self.root, key)
+        self._root = self._delete(self._root, key)
 
     def _delete(self, node, key):
         if node is None:
@@ -300,7 +300,7 @@ class SplayTreeWithMaxsize(SplayTree):
 
     def track_max_node(self):
         bookkeep = []
-        self._track_max_node(self.root, bookkeep)
+        self._track_max_node(self._root, bookkeep)
         return bookkeep
 
     def _track_max_node(self, node, bookkeep):
@@ -310,7 +310,7 @@ class SplayTreeWithMaxsize(SplayTree):
         self._track_max_node(node.right, bookkeep)
 
     def delete_deepest_node(self):
-        self.root = self._delete_deepest_node(self.root)
+        self._root = self._delete_deepest_node(self._root)
 
     def _delete_deepest_node(self, node):
         if node is None:

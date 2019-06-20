@@ -41,12 +41,18 @@ class Node:
 
 class Tree:
     def __init__(self):
-        self.root = None
+        self._root = None
         self.size = 0
 
     def clear(self):
-        self.root = None
+        self._root = None
         self.size = 0
+
+    @property
+    def root(self):
+        if self._root is None:
+            return None
+        return self._root.value
 
     def isEmpty(self):
         return self.size == 0
@@ -55,7 +61,7 @@ class Tree:
         return self.size
 
     def __str__(self):
-        return self._recursive_str(self.root)
+        return self._recursive_str(self._root)
 
     def _recursive_str(self, node):
         if node is None:
@@ -96,7 +102,7 @@ class Tree:
             raise ValueError("Wrong ordering chosen.")
 
     def pre_order_traverse(self):
-        return self._pre_order_traverse(self.root)
+        return self._pre_order_traverse(self._root)
 
     def _pre_order_traverse(self, node):
         if node is None:
@@ -106,7 +112,7 @@ class Tree:
             yield from self._pre_order_traverse(child)
 
     def post_order_traverse(self):
-        return self._post_order_traverse(self.root)
+        return self._post_order_traverse(self._root)
 
     def _post_order_traverse(self, node):
         if node is None:
@@ -117,7 +123,7 @@ class Tree:
 
     def breadth_first_order_traverse(self):
         q = Queue()
-        q.enqueue(self.root)
+        q.enqueue(self._root)
         while not q.isEmpty():
             node = q.dequeue()
             if node is not None:
@@ -197,13 +203,13 @@ class BinaryTree(M_aryTree):
 
 if __name__ == '__main__':
     tree1 = Tree()
-    tree1.root = Node(0)
-    tree1.root.children = [Node(1), Node(2), Node(3)]
-    tree1.root.children[0].children = [Node(4), Node(2), Node(3)]
+    tree1._root = Node(0)
+    tree1._root.children = [Node(1), Node(2), Node(3)]
+    tree1._root.children[0].children = [Node(4), Node(2), Node(3)]
 
     tree2 = Tree()
-    tree2.root = Node(0)
-    tree2.root.children = [Node(4), Node(2), Node(3)]
+    tree2._root = Node(0)
+    tree2._root.children = [Node(4), Node(2), Node(3)]
 
     print(list(tree1.pre_order_traverse()))
     print(tree1)

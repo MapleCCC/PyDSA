@@ -34,12 +34,12 @@ class TestSplayTree(unittest.TestCase):
 
     def test_splay(self):
         self.st.insert(1)
-        self.assertEqual(self.st.root.value, 1)
+        self.assertEqual(self.st.root, 1)
         self.st.insert(2)
         self.assertEqual(self.st.size, 2)
-        self.assertEqual(self.st.root.value, 2)
+        self.assertEqual(self.st.root, 2)
         self.st.insert(5)
-        self.assertEqual(self.st.root.value, 5)
+        self.assertEqual(self.st.root, 5)
 
     # def test_cut_by_half(self):
     #     self.st.insert(1, 13)
