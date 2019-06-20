@@ -133,28 +133,28 @@ class LRU_Cache:
             self.maxsize = maxsize
 
         self._cache = {}
-        self.recency_bookkeep = []  # keep track of the least recently used entry
-        self.hit = 0
-        self.miss = 0
+        self._recency_bookkeep = []  # keep track of the least recently used entry
+        self._hit = 0
+        self._miss = 0
 
     def insert(self, key, value):
         result = self._find(key)
         if result is not None:
             if result == value:
-                self.recency_bookkeep.remove(key)
-                self.recency_bookkeep.insert(0, key)
+                self._recency_bookkeep.remove(key)
+                self._recency_bookkeep.insert(0, key)
                 return
             else:
-                self.recency_bookkeep.remove(key)
+                self._recency_bookkeep.remove(key)
         elif len(self._cache) == self.maxsize:
             # delete the least recently used entry
-            lru_entry = self.recency_bookkeep[-1]
+            lru_entry = self._recency_bookkeep[-1]
             self.delete(lru_entry)
 
         self._cache[key] = value
-        self.recency_bookkeep.insert(0, key)
+        self._recency_bookkeep.insert(0, key)
 
-        # print("The bookkeep is {}".format(self.recency_bookkeep))
+        # print("The bookkeep is {}".format(self._recency_bookkeep))
 
     def _find(self, key):
         if key in self._cache.keys():
@@ -165,15 +165,23 @@ class LRU_Cache:
     def find(self, key):
         result = self._find(key)
         if result is None:
-            self.miss += 1
+            self._miss += 1
         else:
-            self.hit += 1
+            self._hit += 1
         return result
 
     def delete(self, key):
         if key in self._cache:
             del self._cache[key]
-            self.recency_bookkeep.remove(key)
+            self._recency_bookkeep.remove(key)
+
+    @property
+    def hit(self):
+        return self._hit
+
+    @property
+    def miss(self):
+        return self._miss
 
     @property
     def size(self):
@@ -195,16 +203,24 @@ class Clock_Cache:
 class SplayTree_Cache(SplayTreeWithMaxsize):
     def __init__(self, maxsize):
         super().__init__(maxsize)
-        self.hit = 0
-        self.miss = 0
+        self._hit = 0
+        self._miss = 0
 
     def find(self, key):
         result = super().find(key)
         if result is None:
-            self.miss += 1
+            self._miss += 1
         else:
-            self.hit += 1
+            self._hit += 1
         return result
+
+    @property
+    def hit(self):
+        return self._hit
+
+    @property
+    def miss(self):
+        return self._miss
 
     @property
     def hit_rate(self):
