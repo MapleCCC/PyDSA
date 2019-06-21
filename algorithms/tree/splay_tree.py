@@ -18,9 +18,12 @@
 __all__ = ["SplayTree", "SplayTreeWithMaxsize"]
 
 from .abstract_tree import BinaryTree, BinaryNode as Node
+from enum import Enum
 
-LEFT = 1
-RIGHT = 0
+
+class Branch(Enum):
+    LEFT = 1
+    RIGHT = 0
 
 
 class BottomUpSplayTree(BinaryTree):
@@ -160,12 +163,12 @@ class BottomUpSplayTree(BinaryTree):
         # because of Python's pass-by-object-reference mechanism
         node1.swap(node2)
 
-        if branch == LEFT:
+        if branch == Branch.LEFT:
             node1.left = node2.left
             node2.left = node2.right
             node2.right = node1.right
             node1.right = node2
-        elif branch == RIGHT:
+        elif branch == Branch.RIGHT:
             node1.right = node2.right
             node2.right = node2.left
             node2.left = node1.left
@@ -187,10 +190,10 @@ class BottomUpSplayTree(BinaryTree):
             bookkeep.append(node)
             return
         elif value < node.value:
-            bookkeep += [node, LEFT]
+            bookkeep += [node, Branch.LEFT]
             self._track(node.left, value, bookkeep)
         else:
-            bookkeep += [node, RIGHT]
+            bookkeep += [node, Branch.RIGHT]
             self._track(node.right, value, bookkeep)
 
 
