@@ -6,9 +6,9 @@ A toy project dedicated to study purpose. Learn both Python programming language
 
 1. Pick the data structure you need from [Table](#table). Copy source code or individual file.
 
-2. Add the `pystl/` package to your working directory.
+2. Add the `algorithms/` package to your working directory.
 
-3. Deploy the `pystl/` directory to somewhere centric, add it to `PYTHONPATH`.
+3. Deploy the `algorithms/` directory to somewhere centric, add it to `PYTHONPATH`.
 
 ## Table
 
@@ -17,5 +17,9 @@ A toy project dedicated to study purpose. Learn both Python programming language
 ## Run Test
 
 ```bash
+# Run all test suites
 $ make test
+
+# Run a certain test
+$ python -m unittest test.test_splay_tree
 ```
