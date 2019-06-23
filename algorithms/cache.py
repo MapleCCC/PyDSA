@@ -1,7 +1,26 @@
 __all__ = ["Cache", "cache_decorator"]
 
+import gc
 from functools import wraps
 from .tree.splay_tree import SplayTreeWithMaxsize
+
+
+sentinel = object()
+
+MAX_MEM_ALLOC = 2 ** 12
+
+
+class ValueWrapper:
+    # provide zero-argument initializatioon
+    def __init__(self, value=None, index=None):
+        self.value = value
+        self.index = index
+
+    def __str__(self):
+        return "(value={}, index={})".format(self.value, self.index)
+
+    def __repr__(self):
+        return str(self)
 
 
 class LRU_Cache:
@@ -19,9 +38,9 @@ class LRU_Cache:
         ----------
         | Operation | Complexity |
         ==========================
-        | get item | O(N) |
-        | set item | O(N) |
-        | delete item | O(N) |
+        | get item | Amortized analysis needed |
+        | set item | O(1) |
+        | delete item | O(1) |
     """
 
     def __init__(self, maxsize=128):
@@ -31,14 +50,17 @@ class LRU_Cache:
         self._recency = []  # keep track of the recency ranking
         self._hit = 0
         self._miss = 0
+        self._offset = 0
 
-    __slots__ = ["_maxsize", "_storage", "_recency", "_hit", "_miss"]
+    __slots__ = ["_maxsize", "_storage",
+                 "_recency", "_hit", "_miss", "_offset"]
 
     def clear(self):
         self._storage.clear()
         self._recency.clear()
         self._hit = 0
         self._miss = 0
+        self._offset = 0
 
     @property
     def size(self):
@@ -52,14 +74,15 @@ class LRU_Cache:
 
     def update_MRU(self, key):
         try:
-            self._recency.remove(key)
-        except ValueError:
+            self._recency[self._storage[key].index] = sentinel
+        except TypeError:
             pass
-        self._recency.insert(0, key)
+        self._recency.append(key)
+        self._storage[key].index = len(self._recency) - 1
 
     def __getitem__(self, key):
         try:
-            value = self._storage[key]
+            value = self._storage[key].value
             self._hit += 1
             self.update_MRU(key)
             return value
@@ -68,15 +91,38 @@ class LRU_Cache:
             raise
 
     def __setitem__(self, key, value):
-        self._storage[key] = value
+        self._storage[key] = ValueWrapper(value)
         self.update_MRU(key)
+
+        # TODO: concurrency, multi-threaded
         if self.size > self._maxsize:
-            del self._storage[self._recency.pop()]
+            self.discard_lru()
             assert self.size <= self._maxsize
 
+        # no need to calculate _storage size, since it's bounded by self._maxsize, just subtract _maxsize frm MAX_MEM_ALLOC will do the trick.
+        if len(self._recency) > MAX_MEM_ALLOC:
+            self.squash()
+
+    def discard_lru(self):
+        for index, key in enumerate(self._recency[self._offset:]):
+            if key is not sentinel:
+                del self[key]
+                self._offset = index + 1
+                break
+
+    # Garbage collect
+    def squash(self):
+        temp = []
+        for key in self._recency[self._offset:]:
+            if key is not sentinel:
+                temp.append(key)
+                self._storage[key].index = len(temp) - 1
+        self._recency = temp
+        gc.collect()
+
     def __delitem__(self, key):
+        self._recency[self._storage[key].index] = sentinel
         del self._storage[key]
-        self._recency.remove(key)
 
 
 class Clock_Cache:
