@@ -123,68 +123,23 @@ class BinarySearchTree(BinaryTree):
 
         if value == node.value:
             self._size -= 1
-            return self._delete_THE_node(node)
+            if node.left is not None:
+                itr = node.left
+                prev = node
+                while itr.right is not None:
+                    prev = itr
+                    itr = itr.right
+                prev.right = itr.left
+                node.value = itr.value
+                return node
+            else:
+                return node.right
         elif value < node.value:
             node.left = self._delete(node.left, value)
             return node
         else:
             node.right = self._delete(node.right, value)
             return node
-
-    def _delete_THE_node(self, node):
-        if node is None:
-            return None
-        if node.left is not None:
-            left_max_node = self._find_max_node(node.left)
-            left_max_node.right = node.right
-            return node.left
-        else:
-            return node.right
-
-    def delete_min_node(self):
-        self._root = self._delete_min_node(self._root)
-
-    def _delete_min_node(self, node):
-        if node is None:
-            return None
-        if node.left is None:
-            self._size -= 1
-            return None
-        node.left = self._delete_min_node(node.left)
-        return node
-
-    def delete_max_node(self):
-        self._root = self._delete_max_node(self._root)
-
-    def _delete_max_node(self, node):
-        if node is None:
-            return None
-        if node.right is None:
-            self._size -= 1
-            return None
-        node.right = self._delete_max_node(node.right)
-        return node
-
-    def find_min_node(self):
-        return self._find_min_node(self._root)
-
-    def _find_min_node(self, node):
-        if node is None:
-            return None
-        if node.left is None:
-            return node
-        return self._find_min_node(node.left)
-
-    def find_max_node(self):
-        return self._find_max_node(self._root)
-
-    def _find_max_node(self, node):
-        if node is None:
-            return None
-        if node.right is None:
-            return node
-        else:
-            return self._find_max_node(node.right)
 
     default_traversal_order = "in_order"
 
