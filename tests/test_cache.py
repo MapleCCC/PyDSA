@@ -1,80 +1,77 @@
-from algorithms.cache import Cache, cache_decorator
+from algorithms.cache import LRU_Cache, Clock_Cache, SplayTree_Cache, cache_decorator
 import unittest
 from time import time
 from random import randint
 
 
-class TestCache(unittest.TestCase):
-    cache_algorithm = "LRU"
-
+class TestLRUCache(unittest.TestCase):
     def setUp(self):
-        self.cache = Cache(self.__class__.cache_algorithm, maxsize=9)
+        self.cache = LRU_Cache(maxsize=9)
 
     def tearDown(self):
         del self.cache
 
     def trivial_case(self):
-        self.cache.insert(6, 600)
-        self.cache.insert(9, 900)
-        self.cache.insert(4, 400)
-        self.cache.insert(1, 100)
-        self.cache.insert(5, 500)
-        self.cache.insert(3, 300)
-        self.cache.insert(7, 700)
-        self.cache.insert(8, 800)
-        self.cache.insert(2, 200)
+        self.cache[6] = 600
+        self.cache[9] = 900
+        self.cache[4] = 400
+        self.cache[1] = 100
+        self.cache[5] = 500
+        self.cache[3] = 300
+        self.cache[7] = 700
+        self.cache[8] = 800
+        self.cache[2] = 200
 
-    def test_insert(self):
-        self.cache.insert(1, 100)
-        self.assertEqual(self.cache.find(1), 100)
-        self.cache.insert(1, 200)
-        self.assertEqual(self.cache.find(1), 200)
+    def test(self):
+        self.cache[1] = 100
+        self.assertEqual(self.cache[1], 100)
+        self.cache[1] = 200
+        self.assertEqual(self.cache[1], 200)
 
     def test_delete(self):
-        self.cache.insert(1, 100)
-        self.cache.delete(1)
-        self.assertIsNone(self.cache.find(1))
+        self.cache[1] = 100
+        del self.cache[1]
+        with self.assertRaises(KeyError):
+            self.cache[1]
 
     def test_maxsize(self):
         self.trivial_case()
         self.assertEqual(self.cache.size, 9)
-        self.cache.insert(10, 1000)
+        self.cache[10] = 1000
         self.assertEqual(self.cache.size, 9)
-        self.assertIsNone(self.cache.find(6))
-        self.cache.insert(11, 1100)
+        with self.assertRaises(KeyError):
+            self.cache[6]
+        self.cache[11] = 1100
         self.assertEqual(self.cache.size, 9)
-
-
-class TestLRUCache(TestCache):
-    cache_algorithm = "LRU"
 
 
 @unittest.skip("Not Implemented")
-class TestClockCache(TestCache):
-    cache_algorithm = "Clock"
+class TestClockCache(TestLRUCache):
+    def setUp(self):
+        self.cache = Clock_Cache()
 
 
-class TestSplayTreeCache(TestCache):
-    cache_algorithm = "SplayTree"
+class TestSplayTreeCache(TestLRUCache):
+    def setUp(self):
+        self.cache = SplayTree_Cache()
 
     def test_maxsize(self):
         self.trivial_case()
         self.assertEqual(self.cache.size, 9)
-        self.cache.insert(10, 1000)
+        self.cache[10] = 1000
         self.assertEqual(self.cache.size, 9)
-        self.cache.insert(11, 1100)
+        self.cache[11] = 1100
         self.assertEqual(self.cache.size, 9)
 
 
 def Fibonacci(n):
-    if not isinstance(n, int) and n > 0:
-        raise ValueError("Invalid input value.")
+    assert isinstance(n, int) and n > 0
     if n == 1 or n == 2:
         return 1
     return Fibonacci(n - 1) + Fibonacci(n - 2)
 
 
-def duration_benchmark(func, extent, times):
+def time_benchmark(func, extent, times):
     begin = time()
     for _ in range(times):
         func(randint(1, extent))
@@ -85,12 +82,12 @@ def duration_benchmark(func, extent, times):
     return end - begin
 
 
-class TestCacheDecorator(unittest.TestCase):
-    cache_algorithm = "LRU"
+class TestLRUCacheDecorator(unittest.TestCase):
+    # def setUp(self):
+    #     self.decorator = cache_decorator(maxsize=cache_size)
 
     def test_wrapping_is_functional(self):
-        wrapped_function = cache_decorator(
-            self.__class__.cache_algorithm, 128)(max)
+        wrapped_function = cache_decorator(128)(max)
         self.assertEqual(wrapped_function(1, 2), 2)
 
     @unittest.skip("Time spending. And the test result is unstable.")
@@ -99,11 +96,12 @@ class TestCacheDecorator(unittest.TestCase):
         extent = 30
         times = 50
 
-        wrapped_function = cache_decorator(
-            self.__class__.cache_algorithm, maxsize=cache_size)(Fibonacci)
+        wrapped_function = cache_decorator(maxsize=cache_size)(Fibonacci)
 
-        original = duration_benchmark(Fibonacci, extent, times)
-        new = duration_benchmark(wrapped_function, extent, times)
+        original = time_benchmark(Fibonacci, extent, times)
+        new = time_benchmark(wrapped_function, extent, times)
+
+        self.assertLess(new, original)
 
         # hit = wrapped_function.__cache__.hit
         # miss = wrapped_function.__cache__.miss
@@ -114,16 +112,14 @@ class TestCacheDecorator(unittest.TestCase):
 
         # print("Original: {}\nNew: {}".format(original, new))
 
-        self.assertLess(new, original)
-
 
 @unittest.skip("Not implemented")
-class TestClockCacheDecorator(TestCacheDecorator):
-    cache_algorithm = "Clock"
+class TestClockCacheDecorator(TestLRUCacheDecorator):
+    pass
 
 
-class TestSplayTreeCacheDecorator(TestCacheDecorator):
-    cache_algorithm = "SplayTree"
+class TestSplayTreeCacheDecorator(TestLRUCacheDecorator):
+    pass
 
 
 if __name__ == "__main__":
