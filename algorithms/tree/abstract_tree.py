@@ -1,3 +1,4 @@
+import gc
 from ..queue import Queue
 
 
@@ -6,24 +7,34 @@ class Node:
         self.data = data
         self.children = []
 
+    __slots__ = ["data", "children"]
+
     def __str__(self):
         return "Node(data={})".format(self.data)
 
     def __repr__(self):
         return self.__str__()
 
+    def copy(self):
+        """Return a shallow copy"""
+        # Warning: use self.__class__ instead of Node, to avoid mistake in subclassing.
+        new = self.__class__(self.data)
+        new.children = self.children
+        return new
+
     # for search tree implementation
     def __lt__(self, node):
         if not isinstance(node, Node):
+            # TODO: change type(node) to more human readable output.
             raise TypeError(
-                "'<' not supported between instances of 'Node' and '{}'".format(type(node)))
+                "'<' not supported between instances of 'Node' type and '{}'".format(type(node)))
         return self.data < node.data
 
     # for seaerch tree implementation
     def __gt__(self, node):
         if not isinstance(node, Node):
             raise TypeError(
-                "'>' not supported between instances of 'Node' and '{}'".format(type(node)))
+                "'>' not supported between instances of 'Node' type and '{}'".format(type(node)))
         return self.data > node.data
 
     # for equality test
@@ -44,8 +55,13 @@ class Tree:
         self._root = None
         self._size = 0
 
+    __slots__ = ["_root", "_size"]
+
     def clear(self):
+        # A more memory efficient way is to deallocate all nodes. Reduce burden on gc. But it also yields overhead.
+        # Unlike writing C, idiomatic writing style in Python would be to leave the task to gabbage collector.
         self._root = None
+        gc.collect()
         self._size = 0
         return self
 
@@ -78,6 +94,29 @@ class Tree:
 
     def __repr__(self):
         return str(self)
+
+    def copy(self):
+        """
+            Return a new Tree storing copying data
+            Note that data itself possibly requires further deep copy.
+            This method only guarantees deep copy to the level of node.
+        """
+        def recur_copy(node):
+            if node is None:
+                return None, 0
+            new_node = node.copy()
+            new_size = 1
+            for child in new_node.children:
+                child, size = recur_copy(child)
+                new_size += size
+            return new_node, 1 + new_size
+
+        new_root, new_size = recur_copy(self._root)
+        # Warning: use self.__class__ instead of Tree, to avoid mistake in subclassing.
+        new_tree = self.__class__()
+        new_tree._root = new_root
+        new_tree._size = new_size
+        return new_tree
 
     def __iter__(self):
         return self.traverse()
@@ -186,7 +225,7 @@ class BinaryNode(M_aryNode):
 
     @left.setter
     def left(self, node):
-        if not isinstance(node, (Node, type(None))):
+        if not isinstance(node, (BinaryNode, type(None))):
             raise ValueError
         self.children[0] = node
 
@@ -196,7 +235,7 @@ class BinaryNode(M_aryNode):
 
     @right.setter
     def right(self, node):
-        if not isinstance(node, (Node, type(None))):
+        if not isinstance(node, (BinaryNode, type(None))):
             raise ValueError
         self.children[1] = node
 

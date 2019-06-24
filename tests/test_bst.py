@@ -44,6 +44,13 @@ class TestBinarySearchTree(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bst.insert({})
 
+    def test_copy(self):
+        self._construct_trivial_case()
+        new = self.bst.copy()
+        self.assertEqual(list(new.traverse("in_order")), [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(list(new.traverse("pre_order")),
+                         [6, 4, 1, 3, 2, 5, 9, 7, 8])
+
     def test_in_order_traversal(self):
         self._test_traverse("in_order", [1, 2, 3, 4, 5, 6, 7, 8, 9])
 
