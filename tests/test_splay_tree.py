@@ -1,10 +1,10 @@
-from algorithms.tree.splay_tree import TopDownSplayTree, BottomUpSplayTree
+from algorithms.tree.splay_tree import SplayTree
 import unittest
 
 
 class TestSplayTree(unittest.TestCase):
     def setUp(self):
-        self.st = BottomUpSplayTree()
+        self.st = SplayTree()
 
     def tearDown(self):
         del self.st
@@ -12,11 +12,11 @@ class TestSplayTree(unittest.TestCase):
     def test_insert(self):
         self.st.insert(1)
         # print(self.st)
-        self.assertTrue(self.st.find(1))
+        self.assertTrue(self.st.search(1))
 
     def test_deletion(self):
         self.st.insert(1)
-        self.st.delete(1)
+        self.st.remove(1)
         self.assertEqual(self.st.size, 0)
 
     def test_size(self):
@@ -26,11 +26,11 @@ class TestSplayTree(unittest.TestCase):
         self.st.insert(2)
         self.assertEqual(self.st.size, 2)
 
-    def test_find(self):
+    def test_search(self):
         self.st.insert(1)
-        self.assertFalse(self.st.find(2))
-        self.assertTrue(self.st.find(1))
-        # self.assertEqual(self.st.find('a'), None)
+        self.assertFalse(self.st.search(2))
+        self.assertTrue(self.st.search(1))
+        # self.assertEqual(self.st.search('a'), None)
 
     def test_splay(self):
         self.st.insert(1)
@@ -50,17 +50,6 @@ class TestSplayTree(unittest.TestCase):
     #     self.st.cut_by_half()
     #     # print(self.st)
     #     self.assertEqual(self.st.size, 2)
-
-
-class TestBottomUpSplayTree(TestSplayTree):
-    def setUp(self):
-        self.st = BottomUpSplayTree()
-
-
-@unittest.skip("Not implemented")
-class TestTopDownSplayTree(TestSplayTree):
-    def setUp(self):
-        self.st = TopDownSplayTree()
 
 
 if __name__ == '__main__':

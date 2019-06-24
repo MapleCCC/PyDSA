@@ -26,183 +26,133 @@ class Branch(Enum):
     RIGHT = 0
 
 
-class BottomUpSplayTree(BinaryTree):
+class SplayTree(BinaryTree):
     def insert(self, data):
         self._splay(data)
-
-        if self._root is None:
+        try:
+            if data > self._root.data:
+                new = Node(data)
+                new.left = self._root
+                new.right = self._root.right
+                self._root.right = None
+                self._root = new
+                self._size += 1
+            elif data < self._root.data:
+                new = Node(data)
+                new.right = self._root
+                new.left = self._root.left
+                self._root.left = None
+                self._root = new
+                self._size += 1
+        except AttributeError:
             self._root = Node(data)
             self._size += 1
-            return
+        return self
 
-        if data == self._root.data:
-            return
+    def remove(self, data):
+        self._root = self.recur_remove(self._root, data)
+        return self
 
-        if data > self._root.data:
-            new = Node(data)
-            new.left = self._root
-            new.right = self._root.right
-            self._root.right = None
-            self._root = new
-            self._size += 1
-            return
-
-        if data < self._root.data:
-            new = Node(data)
-            new.right = self._root
-            new.left = self._root.left
-            self._root.left = None
-            self._root = new
-            self._size += 1
-            return
-
-    def delete(self, data):
-        self._root = self._delete(self._root, data)
-
-    def _delete(self, node, data):
+    def recur_remove(self, node, data):
         if node is None:
             return None
 
         if data == node.data:
             self._size -= 1
-            return self._delete_THE_node(node)
+            if node.left is not None:
+                itr = node.left
+                prev = node
+                while itr.right is not None:
+                    prev = itr
+                    itr = itr.right
+                prev.right = itr.left
+                node.data = itr.data
+                return node
+            else:
+                return node.right
         elif data < node.data:
-            node.left = self._delete(node.left, data)
+            node.left = self.recur_remove(node.left, data)
             return node
         else:
-            node.right = self._delete(node.right, data)
+            node.right = self.recur_remove(node.right, data)
             return node
 
-    def _delete_THE_node(self, node):
-        if node is None:
-            return None
-        if node.left is not None:
-            left_max_node = self._find_max_node(node.left)
-            left_max_node.right = node.right
-            return node.left
-        else:
-            return node.right
-
-    def find_min_node(self):
-        return self._find_min_node(self._root)
-
-    def _find_min_node(self, node):
-        if node is None:
-            return None
-        if node.left is None:
-            return node
-        return self._find_min_node(node.left)
-
-    def find_max_node(self):
-        return self._find_max_node(self._root)
-
-    def _find_max_node(self, node):
-        if node is None:
-            return None
-        if node.right is None:
-            return node
-        else:
-            return self._find_max_node(node.right)
-
-    def find(self, data):
+    def search(self, data):
         self._splay(data)
-
-        if self._root is None:
-            return False
-
-        if data == self._root.data:
-            return True
-        else:
+        try:
+            return True if self._root.data == data else False
+        except AttributeError:
             return False
 
     def _splay(self, data):
-        bookkeep = self.track(data)
+        def probe(node):
+            if data == node.data:
+                return None, None
+            elif data < node.data:
+                return Branch.LEFT, itr.left
+            else:
+                return Branch.RIGHT, itr.right
 
-        if bookkeep[-1] is None:
-            # if the data cannot be found, splay last visited node instead.
-            # Such strategy is for some implementation methods of `insert` and `find`
-            path_nodes = bookkeep[:-2]
-        else:
-            path_nodes = bookkeep
+        def zig(parent, branch, child):
+            if branch == Branch.LEFT:
+                R_min.left = parent
+                R_min = parent
+                parent.left = None
+            else:
+                L_max.right = parent
+                L_max = parent
+                parent.right = None
 
-        self._splay_helper(path_nodes)
+        def zig_zig(parent, branch1, child, branch2, gchild):
+            if branch1 == Branch.LEFT:
+                R_min.left = child
+                R_min = child
+                child.left = None
+                parent.left = child.right
+                child.right = parent
+            else:
+                L_max.right = child
+                L_max = child
+                child.right = None
+                parent.right = child.left
+                child.left = parent
 
-    def _splay_helper(self, path_nodes):
-        if len(path_nodes) in {0, 1}:
-            return
-        elif len(path_nodes) == 3:
-            self.single_rotate(*path_nodes[-3:])
-            self._splay_helper(path_nodes[:-2])
-        elif len(path_nodes) >= 5:
-            self.double_rotate(*path_nodes[-5:])
-            self._splay_helper(path_nodes[:-4])
-        else:
-            raise ValueError(
-                "Something went wrong. path_nodes is {}".format(path_nodes))
+        def zig_zag(parent, branch1, child, branch2, gchild):
+            zig(parent, branch1, child)
+            zig(child, branch2, gchild)
 
-    def single_rotate(self, node1, branch, node2):
-        self.zig(node1, branch, node2)
-
-    def double_rotate(self, node1, branch1, node2, branch2, node3):
-        if branch1 == branch2:
-            self.zig_zig(node1, branch1, node2, branch2, node3)
-        else:
-            self.zig_zag(node1, branch1, node2, branch2, node3)
-
-    def zig_zag(self, node1, branch1, node2, branch2, node3):
-        self.zig(node2, branch2, node3)
-        self.zig(node1, branch1, node2)
-
-    def zig_zig(self, node1, branch1, node2, branch2, node3):
-        self.zig(node1, branch1, node2)
-        self.zig(node1, branch2, node3)
-
-    def zig(self, node1, branch, node2):
-        # Note that we should manipulate node1 and node2's pointer
-        # instead of directly reassign themselves
-        # because of Python's pass-by-object-reference mechanism
-        node1.swap(node2)
-
-        if branch == Branch.LEFT:
-            node1.left = node2.left
-            node2.left = node2.right
-            node2.right = node1.right
-            node1.right = node2
-        elif branch == Branch.RIGHT:
-            node1.right = node2.right
-            node2.right = node2.left
-            node2.left = node1.left
-            node1.left = node2
-        else:
-            raise ValueError("Something went wrong.")
-
-    def track(self, data):
-        bookkeep = []
-        self._track(self._root, data, bookkeep)
-        return bookkeep
-
-    def _track(self, node, data, bookkeep):
-        if node is None:
-            bookkeep.append(node)
+        if self.isEmpty():
             return
 
-        if data == node.data:
-            bookkeep.append(node)
-            return
-        elif data < node.data:
-            bookkeep += [node, Branch.LEFT]
-            self._track(node.left, data, bookkeep)
-        else:
-            bookkeep += [node, Branch.RIGHT]
-            self._track(node.right, data, bookkeep)
+        # sentinel
+        L = Node(None)
+        R = Node(None)
+        # pointer to mount entry
+        L_max = L
+        R_min = R
 
+        itr = self._root
+        while True:
+            branch1, child = probe(itr)
+            if child is None:
+                break
+            branch2, gchild = probe(child)
+            if gchild is None:
+                zig(itr, branch1, child)
+                itr = child
+                break
+            if branch1 == branch2:
+                zig_zig(itr, branch1, child, branch2, gchild)
+            else:
+                zig_zag(itr, branch1, child, branch2, gchild)
+            itr = gchild
 
-# TODO: implement top down splay tree.
-class TopDownSplayTree(BinaryTree):
-    pass
+        L_max.right = itr.left
+        R_min.left = itr.right
+        itr.left = L.left
+        itr.right = R.right
 
-
-SplayTree = BottomUpSplayTree
+        self._root = itr
 
 
 class SplayTreeWithMaxsize(SplayTree):
