@@ -27,19 +27,19 @@ class Branch(Enum):
 
 
 class BottomUpSplayTree(BinaryTree):
-    def insert(self, value):
-        self._splay(value)
+    def insert(self, data):
+        self._splay(data)
 
         if self._root is None:
-            self._root = Node(value)
+            self._root = Node(data)
             self._size += 1
             return
 
-        if value == self._root.value:
+        if data == self._root.data:
             return
 
-        if value > self._root.value:
-            new = Node(value)
+        if data > self._root.data:
+            new = Node(data)
             new.left = self._root
             new.right = self._root.right
             self._root.right = None
@@ -47,8 +47,8 @@ class BottomUpSplayTree(BinaryTree):
             self._size += 1
             return
 
-        if value < self._root.value:
-            new = Node(value)
+        if data < self._root.data:
+            new = Node(data)
             new.right = self._root
             new.left = self._root.left
             self._root.left = None
@@ -56,21 +56,21 @@ class BottomUpSplayTree(BinaryTree):
             self._size += 1
             return
 
-    def delete(self, value):
-        self._root = self._delete(self._root, value)
+    def delete(self, data):
+        self._root = self._delete(self._root, data)
 
-    def _delete(self, node, value):
+    def _delete(self, node, data):
         if node is None:
             return None
 
-        if value == node.value:
+        if data == node.data:
             self._size -= 1
             return self._delete_THE_node(node)
-        elif value < node.value:
-            node.left = self._delete(node.left, value)
+        elif data < node.data:
+            node.left = self._delete(node.left, data)
             return node
         else:
-            node.right = self._delete(node.right, value)
+            node.right = self._delete(node.right, data)
             return node
 
     def _delete_THE_node(self, node):
@@ -104,22 +104,22 @@ class BottomUpSplayTree(BinaryTree):
         else:
             return self._find_max_node(node.right)
 
-    def find(self, value):
-        self._splay(value)
+    def find(self, data):
+        self._splay(data)
 
         if self._root is None:
             return False
 
-        if value == self._root.value:
+        if data == self._root.data:
             return True
         else:
             return False
 
-    def _splay(self, value):
-        bookkeep = self.track(value)
+    def _splay(self, data):
+        bookkeep = self.track(data)
 
         if bookkeep[-1] is None:
-            # if the value cannot be found, splay last visited node instead.
+            # if the data cannot be found, splay last visited node instead.
             # Such strategy is for some implementation methods of `insert` and `find`
             path_nodes = bookkeep[:-2]
         else:
@@ -176,25 +176,25 @@ class BottomUpSplayTree(BinaryTree):
         else:
             raise ValueError("Something went wrong.")
 
-    def track(self, value):
+    def track(self, data):
         bookkeep = []
-        self._track(self._root, value, bookkeep)
+        self._track(self._root, data, bookkeep)
         return bookkeep
 
-    def _track(self, node, value, bookkeep):
+    def _track(self, node, data, bookkeep):
         if node is None:
             bookkeep.append(node)
             return
 
-        if value == node.value:
+        if data == node.data:
             bookkeep.append(node)
             return
-        elif value < node.value:
+        elif data < node.data:
             bookkeep += [node, Branch.LEFT]
-            self._track(node.left, value, bookkeep)
+            self._track(node.left, data, bookkeep)
         else:
             bookkeep += [node, Branch.RIGHT]
-            self._track(node.right, value, bookkeep)
+            self._track(node.right, data, bookkeep)
 
 
 # TODO: implement top down splay tree.
@@ -245,8 +245,8 @@ class SplayTreeWithMaxsize(SplayTree):
         self._update_node_height(node1)
         self._update_node_height(node2)
 
-    def insert(self, value):
-        super().insert(value)
+    def insert(self, data):
+        super().insert(data)
         if self._root is None:
             return
 
@@ -270,20 +270,20 @@ class SplayTreeWithMaxsize(SplayTree):
         else:
             node.height = max(node.left.height, node.right.height) + 1
 
-    def delete(self, value):
-        self._root = self._delete(self._root, value)
+    def delete(self, data):
+        self._root = self._delete(self._root, data)
 
-    def _delete(self, node, value):
+    def _delete(self, node, data):
         if node is None:
             return None
 
-        if value == node.value:
+        if data == node.data:
             self._size -= 1
             return self._delete_THE_node(node)
-        elif value < node.value:
-            node.left = self._delete(node.left, value)
+        elif data < node.data:
+            node.left = self._delete(node.left, data)
         else:
-            node.right = self._delete(node.right, value)
+            node.right = self._delete(node.right, data)
 
         self._update_node_height(node)
         return node

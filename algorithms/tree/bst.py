@@ -79,47 +79,47 @@ class BinarySearchTree(BinaryTree):
             return 0
         return 1 + max(self.recur_height(node.left), self.recur_height(node.right))
 
-    def insert(self, value):
-        self._root = self.recur_insert(self._root, value)
+    def insert(self, data):
+        self._root = self.recur_insert(self._root, data)
         return self
 
-    def recur_insert(self, node, value):
+    def recur_insert(self, node, data):
         if node is None:
             self._size += 1
-            return Node(value)
+            return Node(data)
 
-        if value == node.value:
+        if data == node.data:
             return node
-        elif value < node.value:
-            node.left = self.recur_insert(node.left, value)
+        elif data < node.data:
+            node.left = self.recur_insert(node.left, data)
             return node
         else:
-            node.right = self.recur_insert(node.right, value)
+            node.right = self.recur_insert(node.right, data)
             return node
 
-    def search(self, value):
-        return self.recur_search(self._root, value)
+    def search(self, data):
+        return self.recur_search(self._root, data)
 
-    def recur_search(self, node, value):
+    def recur_search(self, node, data):
         if node is None:
             return False
 
-        if value == node.value:
+        if data == node.data:
             return True
-        elif value > node.value:
-            return self.recur_search(node.right, value)
+        elif data > node.data:
+            return self.recur_search(node.right, data)
         else:
-            return self.recur_search(node.left, value)
+            return self.recur_search(node.left, data)
 
-    def remove(self, value):
-        self._root = self.recur_remove(self._root, value)
+    def remove(self, data):
+        self._root = self.recur_remove(self._root, data)
         return self
 
-    def recur_remove(self, node, value):
+    def recur_remove(self, node, data):
         if node is None:
             return None
 
-        if value == node.value:
+        if data == node.data:
             self._size -= 1
             if node.left is not None:
                 itr = node.left
@@ -128,15 +128,15 @@ class BinarySearchTree(BinaryTree):
                     prev = itr
                     itr = itr.right
                 prev.right = itr.left
-                node.value = itr.value
+                node.data = itr.data
                 return node
             else:
                 return node.right
-        elif value < node.value:
-            node.left = self.recur_remove(node.left, value)
+        elif data < node.data:
+            node.left = self.recur_remove(node.left, data)
             return node
         else:
-            node.right = self.recur_remove(node.right, value)
+            node.right = self.recur_remove(node.right, data)
             return node
 
     default_traversal_order = "in_order"

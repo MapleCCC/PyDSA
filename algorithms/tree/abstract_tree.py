@@ -2,12 +2,12 @@ from ..queue import Queue
 
 
 class Node:
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, data):
+        self.data = data
         self.children = []
 
     def __str__(self):
-        return "Node(value={})".format(self.value)
+        return "Node(data={})".format(self.data)
 
     def __repr__(self):
         return self.__str__()
@@ -17,26 +17,26 @@ class Node:
         if not isinstance(node, Node):
             raise TypeError(
                 "'<' not supported between instances of 'Node' and '{}'".format(type(node)))
-        return self.value < node.value
+        return self.data < node.data
 
     # for seaerch tree implementation
     def __gt__(self, node):
         if not isinstance(node, Node):
             raise TypeError(
                 "'>' not supported between instances of 'Node' and '{}'".format(type(node)))
-        return self.value > node.value
+        return self.data > node.data
 
     # for equality test
     def __eq__(self, node):
         if not isinstance(node, Node):
             return False
-        return self.value == node.value
+        return self.data == node.data
 
     def swap(self, node):
         if not isinstance(node, Node):
             raise TypeError(
                 "Cannot swap 'Node' type with '{}' type.".format(type(node)))
-        self.value, node.value = node.value, self.value
+        self.data, node.data = node.data, self.data
 
 
 class Tree:
@@ -53,7 +53,7 @@ class Tree:
     def root(self):
         if self._root is None:
             return None
-        return self._root.value
+        return self._root.data
 
     @property
     def size(self):
@@ -72,9 +72,9 @@ class Tree:
         if node is None:
             return 'None'
         if len(node.children) == 0:
-            return "Node(value={})".format(node.value)
+            return "Node(data={})".format(node.data)
         else:
-            return "Node(value={}, children=[{}])".format(node.value, ', '.join(self._recursive_str(child) for child in node.children))
+            return "Node(data={}, children=[{}])".format(node.data, ', '.join(self._recursive_str(child) for child in node.children))
 
     def __repr__(self):
         return str(self)
@@ -94,7 +94,7 @@ class Tree:
             order = self.__class__.default_traversal_order
 
         for node in self._traverse(order):
-            yield node.value
+            yield node.data
 
     default_traversal_order = "breadth_first_order"
 
@@ -163,8 +163,8 @@ class Tree:
 
 
 class M_aryNode(Node):
-    def __init__(self, value, branch=2):
-        super().__init__(value)
+    def __init__(self, data, branch=2):
+        super().__init__(data)
         self.children = [None] * branch
 
 
@@ -177,8 +177,8 @@ class M_aryTree(Tree):
 
 
 class BinaryNode(M_aryNode):
-    def __init__(self, value):
-        super().__init__(value, branch=2)
+    def __init__(self, data):
+        super().__init__(data, branch=2)
 
     @property
     def left(self):
