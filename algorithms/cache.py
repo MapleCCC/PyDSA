@@ -2,25 +2,8 @@ __all__ = ["Cache", "cache_decorator"]
 
 import gc
 from functools import wraps
+from .recency_tracker import RecencyTracker
 from .tree.splay_tree import SplayTreeWithMaxsize
-
-
-sentinel = object()
-
-MAX_MEM_ALLOC = 2 ** 12
-
-
-class ValueWrapper:
-    # provide zero-argument initializatioon
-    def __init__(self, value=None, index=None):
-        self.value = value
-        self.index = index
-
-    def __str__(self):
-        return "(value={}, index={})".format(self.value, self.index)
-
-    def __repr__(self):
-        return str(self)
 
 
 class LRU_Cache:
@@ -44,23 +27,21 @@ class LRU_Cache:
     """
 
     def __init__(self, maxsize=128):
-        assert isinstance(maxsize, int)
-        self._maxsize = maxsize if maxsize > 0 else 1
+        assert isinstance(maxsize, int) and maxsize > 0
+        self._maxsize = maxsize
         self._storage = {}
-        self._recency = []  # keep track of the recency ranking
+        self._recency_tracker = RecencyTracker()
         self._hit = 0
         self._miss = 0
-        self._offset = 0
 
     __slots__ = ["_maxsize", "_storage",
-                 "_recency", "_hit", "_miss", "_offset"]
+                 "_recency_tracker", "_hit", "_miss"]
 
     def clear(self):
         self._storage.clear()
-        self._recency.clear()
+        self._recency_tracker.clear()
         self._hit = 0
         self._miss = 0
-        self._offset = 0
 
     @property
     def size(self):
@@ -72,57 +53,36 @@ class LRU_Cache:
     def statistic(self):
         return self._hit, self._miss
 
-    def update_MRU(self, key):
-        try:
-            self._recency[self._storage[key].index] = sentinel
-        except TypeError:
-            pass
-        self._recency.append(key)
-        self._storage[key].index = len(self._recency) - 1
-
     def __getitem__(self, key):
         try:
-            value = self._storage[key].value
+            value = self._storage[key]
             self._hit += 1
-            self.update_MRU(key)
+            self._recency_tracker.update_mru(key)
             return value
         except KeyError:
             self._miss += 1
             raise
 
     def __setitem__(self, key, value):
-        self._storage[key] = ValueWrapper(value)
-        self.update_MRU(key)
+        self._storage[key] = value
+        self._recency_tracker.update_mru(key)
 
         # TODO: concurrency, multi-threaded
         if self.size > self._maxsize:
             self.discard_lru()
             assert self.size <= self._maxsize
 
-        # no need to calculate _storage size, since it's bounded by self._maxsize, just subtract _maxsize frm MAX_MEM_ALLOC will do the trick.
-        if len(self._recency) > MAX_MEM_ALLOC:
-            self.squash()
-
     def discard_lru(self):
-        for index, key in enumerate(self._recency[self._offset:]):
-            if key is not sentinel:
-                del self[key]
-                self._offset = index + 1
-                break
-
-    # Garbage collect
-    def squash(self):
-        temp = []
-        for key in self._recency[self._offset:]:
-            if key is not sentinel:
-                temp.append(key)
-                self._storage[key].index = len(temp) - 1
-        self._recency = temp
-        gc.collect()
+        try:
+            entry = self._recency_tracker.pop_lru()
+            del self._storage[entry]
+        except IndexError:
+            raise IndexError("Empty cache has nothing to discard")
 
     def __delitem__(self, key):
-        self._recency[self._storage[key].index] = sentinel
         del self._storage[key]
+        self._recency_tracker.remove(key)
+
 
 
 class Clock_Cache:

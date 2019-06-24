@@ -43,6 +43,8 @@ class TestLRUCache(unittest.TestCase):
             self.cache[6]
         self.cache[11] = 1100
         self.assertEqual(self.cache.size, 9)
+        with self.assertRaises(KeyError):
+            self.cache[9]
 
 
 @unittest.skip("Not Implemented")
