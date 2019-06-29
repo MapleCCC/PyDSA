@@ -74,9 +74,9 @@ class TestBinarySearchTree(unittest.TestCase):
         self.assertEqual(result, supposed_result)
 
     def test_height(self):
-        self.assertEqual(self.bst.height, 0)
+        self.assertEqual(self.bst.height, -1)
         self._construct_trivial_case()
-        self.assertEqual(self.bst.height, 5)
+        self.assertEqual(self.bst.height, 4)
         # Should not test height after any deletion operation.
         # Unlike insertion operation, which lead to deterministic tree layout.
         # deletion operation have non-unique implementation approach (up to concrete implementation algorithm) that could lead to different tree layout afterwards.
