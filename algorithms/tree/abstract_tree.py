@@ -52,6 +52,15 @@ class Tree:
     def __len__(self):
         return self.size
 
+    @property
+    def height(self):
+        return self.recur_height(self._root)
+
+    def recur_height(self, node):
+        if node is None:
+            return -1
+        return 1 + max(self.recur_height(node.left), self.recur_height(node.right))
+
     def __str__(self):
         return self._recursive_str(self._root)
 

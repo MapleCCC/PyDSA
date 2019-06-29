@@ -72,14 +72,6 @@ class BinarySearchTree(BinaryTree):
     """
 
     # TODO: make height computation O(1) instead of O(N)
-    @property
-    def height(self):
-        return self.recur_height(self._root)
-
-    def recur_height(self, node):
-        if node is None:
-            return -1
-        return 1 + max(self.recur_height(node.left), self.recur_height(node.right))
 
     def insert(self, data):
         self._root = self.recur_insert(self._root, data)
