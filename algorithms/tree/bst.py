@@ -120,33 +120,40 @@ class BinarySearchTree(BinaryTree):
             node.right = self.recur_remove(node.right, data)
             return node
         else:
-            self._size -= 1
-            # Randomly pick node to delete from two choices:
-            # "max node in left sub tree", or "min node in right sub tree"
-            if random.choice([0, 1]):
-                if node.left is not None:
-                    itr = node.left
-                    prev = node
-                    while itr.right is not None:
-                        prev = itr
-                        itr = itr.right
-                    prev.right = itr.left
-                    node.data = itr.data
-                    return node
-                else:
-                    return node.right
+            return self._remove_node(node)
+
+    def _remove_node(self, node):
+        if node is None:
+            return None
+
+        self._size -= 1
+
+        # Randomly pick node to delete from two choices:
+        # "max node in left sub tree", or "min node in right sub tree"
+        if random.choice([0, 1]):
+            if node.left is not None:
+                itr = node.left
+                prev = node
+                while itr.right is not None:
+                    prev = itr
+                    itr = itr.right
+                prev.right = itr.left
+                node.data = itr.data
+                return node
             else:
-                if node.right is not None:
-                    itr = node.right
-                    prev = node
-                    while itr.left is not None:
-                        prev = itr
-                        itr = itr.left
-                    prev.left = itr.right
-                    node.data = itr.data
-                    return node
-                else:
-                    return node.left
+                return node.right
+        else:
+            if node.right is not None:
+                itr = node.right
+                prev = node
+                while itr.left is not None:
+                    prev = itr
+                    itr = itr.left
+                prev.left = itr.right
+                node.data = itr.data
+                return node
+            else:
+                return node.left
 
     default_traversal_order = "in_order"
 
