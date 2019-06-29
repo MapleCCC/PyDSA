@@ -41,10 +41,12 @@
 __all__ = ["BinarySearchTree", "BST"]
 
 
+import random
 from functools import wraps
 
 from ..utils import decorate_all_methods
-from .abstract_tree import BinaryTree, BinaryNode as Node
+from .abstract_tree import BinaryNode as Node
+from .abstract_tree import BinaryTree
 
 
 def check_comparable(func):
@@ -119,25 +121,40 @@ class BinarySearchTree(BinaryTree):
         if node is None:
             return None
 
-        if data == node.data:
-            self._size -= 1
-            if node.left is not None:
-                itr = node.left
-                prev = node
-                while itr.right is not None:
-                    prev = itr
-                    itr = itr.right
-                prev.right = itr.left
-                node.data = itr.data
-                return node
-            else:
-                return node.right
-        elif data < node.data:
+        if data < node.data:
             node.left = self.recur_remove(node.left, data)
             return node
-        else:
+        elif data > node.data:
             node.right = self.recur_remove(node.right, data)
             return node
+        else:
+            self._size -= 1
+            # Randomly pick node to delete from two choices:
+            # "max node in left sub tree", or "min node in right sub tree"
+            if random.choice([0, 1]):
+                if node.left is not None:
+                    itr = node.left
+                    prev = node
+                    while itr.right is not None:
+                        prev = itr
+                        itr = itr.right
+                    prev.right = itr.left
+                    node.data = itr.data
+                    return node
+                else:
+                    return node.right
+            else:
+                if node.right is not None:
+                    itr = node.right
+                    prev = node
+                    while itr.left is not None:
+                        prev = itr
+                        itr = itr.left
+                    prev.left = itr.right
+                    node.data = itr.data
+                    return node
+                else:
+                    return node.left
 
     default_traversal_order = "in_order"
 

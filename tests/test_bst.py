@@ -35,9 +35,9 @@ class TestBinarySearchTree(unittest.TestCase):
 
     def test_trivial_case(self):
         self._construct_trivial_case()
-        self.bst.remove(1)
+        self.bst.remove(4)
         self.assertEqual(self.bst.size, 8)
-        self.assertFalse(self.bst.search(1))
+        self.assertFalse(self.bst.search(4))
 
     def test_incomparable_key_type(self):
         self.bst.insert([])
@@ -47,7 +47,8 @@ class TestBinarySearchTree(unittest.TestCase):
     def test_copy(self):
         self._construct_trivial_case()
         new = self.bst.copy()
-        self.assertEqual(list(new.traverse("in_order")), [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEqual(list(new.traverse("in_order")),
+                         [1, 2, 3, 4, 5, 6, 7, 8, 9])
         self.assertEqual(list(new.traverse("pre_order")),
                          [6, 4, 1, 3, 2, 5, 9, 7, 8])
 
