@@ -2,6 +2,7 @@ __all__ = ["Cache", "cache_decorator"]
 
 import gc
 from functools import wraps
+
 from .recency_tracker import RecencyTracker
 from .tree.splay_tree import SplayTreeWithMaxsize
 
@@ -15,7 +16,7 @@ class LRU_Cache:
         Philosophy is to tradeoff time with space.
         Underlying data structure is hash table. (dictionary primitive data type in Python)
 
-        Reference to the *LRU cache mechanism* part in the source code of the `functools` standard library.
+        Reference: the *LRU cache mechanism* part in the source code of the `functools` standard library.
 
         Complexity
         ----------
@@ -27,7 +28,8 @@ class LRU_Cache:
     """
 
     def __init__(self, maxsize=128):
-        assert isinstance(maxsize, int) and maxsize > 0
+        if not isinstance(maxsize, int) or maxsize <= 0:
+            raise ValueError("Invalid *maxsize* setting")
         self._maxsize = maxsize
         self._storage = {}
         self._recency_tracker = RecencyTracker()
@@ -74,8 +76,8 @@ class LRU_Cache:
 
     def discard_lru(self):
         try:
-            entry = self._recency_tracker.pop_lru()
-            del self._storage[entry]
+            key = self._recency_tracker.pop_lru()
+            del self._storage[key]
         except IndexError:
             raise IndexError("Empty cache has nothing to discard")
 
@@ -87,7 +89,7 @@ class LRU_Cache:
 
 class Clock_Cache:
     def __init__(self, maxsize=128):
-        pass
+        raise NotImplementedError
 
 
 class ComparableWrapper:
@@ -161,9 +163,10 @@ def hash_function_arguments(*args, **kw):
     trivial_type = (int, str, frozenset, type(None))
     if len(args) == 1 and len(kw) == 0 and isinstance(args[0], trivial_type):
         return args[0]
-    global sentinel
-    sentinel = object()
-    return hash((*args, sentinel, *kw.items()))
+
+    global SENTINEL
+    SENTINEL = object()
+    return hash((*args, SENTINEL, *kw.items()))
 
 
 def cache_decorator(maxsize=128):
@@ -173,17 +176,22 @@ def cache_decorator(maxsize=128):
     """
     def decorator(user_function):
         cache = Cache()
+
         @wraps(user_function)
         def wrapper(*args, **kw):
-            key = hash_function_arguments(*args, **kw)
             try:
+                key = hash_function_arguments(*args, **kw)
                 return cache[key]
+            except TypeError:
+                raise ValueError("arguments passed to function {} is unhashable: {}".format(user_function.__name__, (args, kw)))
             except KeyError:
                 value = user_function(*args, **kw)
                 cache[key] = value
                 return value
+
         wrapper.__cache__ = cache
         return wrapper
+
     return decorator
 
 

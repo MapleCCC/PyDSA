@@ -1,7 +1,9 @@
-from algorithms.cache import LRU_Cache, Clock_Cache, SplayTree_Cache, cache_decorator
 import unittest
-from time import time
 from random import randint
+from time import time
+
+from algorithms.cache import (Clock_Cache, LRU_Cache, SplayTree_Cache,
+                              cache_decorator)
 
 
 class TestLRUCache(unittest.TestCase):
