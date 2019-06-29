@@ -2,7 +2,8 @@ __all__ = ["RecencyTracker"]
 
 import gc
 
-sentinel = object()
+# Sentinel Object Pattern
+DELETED = object()
 
 # Other than shrink which is expensive, we can also consider reuse the slice _storage[:offset]
 # try examining the Round Robin data structure and its complexity
@@ -40,16 +41,16 @@ class RecencyTracker:
 
     def pop_lru(self):
         for index, entry in enumerate(self._storage[self._offset:]):
-            if entry is not sentinel:
+            if entry is not DELETED:
                 self._offset = index + 1
-                self._storage[index] = sentinel
+                self._storage[index] = DELETED
                 del self._indexer[entry]
                 return entry
         raise IndexError("pop lru from empty recency tracker")
 
     def get_lru(self):
         for index, entry in enumerate(self._storage[self._offset:]):
-            if entry is not sentinel:
+            if entry is not DELETED:
                 self._offset = index
                 return entry
         raise IndexError("get lru from empty recency tracker")
@@ -57,7 +58,7 @@ class RecencyTracker:
     def update_mru(self, entry):
         try:
             self.remove(entry)
-        except:
+        except ValueError:
             pass
         self._storage.append(entry)
         self._indexer[entry] = len(self._storage) - 1
@@ -68,7 +69,7 @@ class RecencyTracker:
     def remove(self, entry):
         try:
             index = self._indexer[entry]
-            self._storage[index] = sentinel
+            self._storage[index] = DELETED
             del self._indexer[entry]
         except KeyError:
             raise ValueError("entry not in tracker")
@@ -92,15 +93,12 @@ class RecencyTracker:
 
         if too_much_hole:
             # Squashing
-            self._storage = [
-                entry for entry in self._storage if entry is not sentinel]
-            for index, entry in enumerate(self._storage):
-                self._indexer[entry] = index
+            self._storage = [entry for entry in self._storage if entry is not DELETED]
+            self._indexer = dict(enumerate(self._storage))
             self._offset = 0
         elif offset_too_long:
             # Shrinking
             self._storage = self._storage[self._offset:]
-            gc.collect()
             for entry in self._indexer:
                 self._indexer[entry] -= self._offset
             self._offset = 0
