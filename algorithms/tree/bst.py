@@ -45,8 +45,8 @@ import random
 from functools import wraps
 
 from ..utils import decorate_all_methods
-from .abstract_tree import BinaryNode as Node
-from .abstract_tree import BinaryTree
+from .binary_tree import BinaryNode as Node
+from .binary_tree import BinaryTree
 
 
 def check_comparable(func):
