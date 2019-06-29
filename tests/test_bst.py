@@ -1,5 +1,6 @@
-from algorithms.tree.bst import BST
 import unittest
+
+from algorithms.tree.bst import BST
 
 
 class TestBinarySearchTree(unittest.TestCase):
@@ -47,6 +48,7 @@ class TestBinarySearchTree(unittest.TestCase):
     def test_copy(self):
         self._construct_trivial_case()
         new = self.bst.copy()
+        self.assertIsNot(new, self.bst)
         self.assertEqual(list(new.traverse("in_order")),
                          [1, 2, 3, 4, 5, 6, 7, 8, 9])
         self.assertEqual(list(new.traverse("pre_order")),

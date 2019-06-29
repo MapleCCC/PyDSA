@@ -1,5 +1,3 @@
-import gc
-
 from ..queue import Queue
 
 
@@ -35,14 +33,13 @@ class Tree:
         # A more memory efficient way is to deallocate all nodes. Reduce burden on gc. But it also yields overhead.
         # Unlike writing C, idiomatic writing style in Python would be to leave the task to gabbage collector.
         self._root = None
-        gc.collect()
         self._size = 0
         return self
 
     @property
     def root(self):
         if self._root is None:
-            return None
+            raise KeyError("No root in an empty tree")
         return self._root.data
 
     @property
@@ -60,11 +57,11 @@ class Tree:
 
     def _recursive_str(self, node):
         if node is None:
-            return 'None'
+            return 'An empty Tree'
         if len(node.children) == 0:
             return "Node(data={})".format(node.data)
         else:
-            return "Node(data={}, children=[{}])".format(node.data, ', '.join(self._recursive_str(child) for child in node.children))
+            return "Node(data={}, children=[{}])".format(node.data, ', '.join(self._recursive_str(child) for child in node.children if child is not None))
 
     def __repr__(self):
         return str(self)
@@ -121,23 +118,23 @@ class Tree:
             raise ValueError("Wrong ordering chosen.")
 
     def pre_order_traverse(self):
-        return self._pre_order_traverse(self._root)
+        return self.recur_pre_order_traverse(self._root)
 
-    def _pre_order_traverse(self, node):
+    def recur_pre_order_traverse(self, node):
         if node is None:
             return
         yield node
         for child in node.children:
-            yield from self._pre_order_traverse(child)
+            yield from self.recur_pre_order_traverse(child)
 
     def post_order_traverse(self):
-        return self._post_order_traverse(self._root)
+        return self.recur_post_order_traverse(self._root)
 
-    def _post_order_traverse(self, node):
+    def recur_post_order_traverse(self, node):
         if node is None:
             return
         for child in node.children:
-            yield from self._post_order_traverse(child)
+            yield from self.recur_post_order_traverse(child)
         yield node
 
     def breadth_first_order_traverse(self):
@@ -179,14 +176,18 @@ class Tree:
 class M_aryNode(Node):
     def __init__(self, data, branch=2):
         super().__init__(data)
+
+        if not isinstance(branch, int) or branch <= 0:
+            raise ValueError("Invalid branch number")
         self.children = [None] * branch
 
 
 class M_aryTree(Tree):
     def __init__(self, m):
         super().__init__()
+
         if not isinstance(m, int) or m <= 0:
-            raise ValueError("Valid branch number is a natural number.")
+            raise ValueError("Valid branch number is a positive integer.")
         self.branch = m
 
 
@@ -201,7 +202,7 @@ class BinaryNode(M_aryNode):
     @left.setter
     def left(self, node):
         if not isinstance(node, (BinaryNode, type(None))):
-            raise ValueError
+            raise TypeError("{} is not BinaryNode type".format(type(node)))
         self.children[0] = node
 
     @property
@@ -211,7 +212,7 @@ class BinaryNode(M_aryNode):
     @right.setter
     def right(self, node):
         if not isinstance(node, (BinaryNode, type(None))):
-            raise ValueError
+            raise TypeError("{} is not BinaryNode type".format(type(node)))
         self.children[1] = node
 
 
