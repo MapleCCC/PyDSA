@@ -1,4 +1,5 @@
 import gc
+
 from ..queue import Queue
 
 
@@ -17,37 +18,10 @@ class Node:
 
     def copy(self):
         """Return a shallow copy"""
-        # Warning: use self.__class__ instead of Node, to avoid mistake in subclassing.
+        # Warning: use `self.__class__` instead of `Node` or `__class__`, to avoid mistake in subclassing.
         new = self.__class__(self.data)
         new.children = self.children
         return new
-
-    # for search tree implementation
-    def __lt__(self, node):
-        if not isinstance(node, Node):
-            # TODO: change type(node) to more human readable output.
-            raise TypeError(
-                "'<' not supported between instances of 'Node' type and '{}'".format(type(node)))
-        return self.data < node.data
-
-    # for seaerch tree implementation
-    def __gt__(self, node):
-        if not isinstance(node, Node):
-            raise TypeError(
-                "'>' not supported between instances of 'Node' type and '{}'".format(type(node)))
-        return self.data > node.data
-
-    # for equality test
-    def __eq__(self, node):
-        if not isinstance(node, Node):
-            return False
-        return self.data == node.data
-
-    def swap(self, node):
-        if not isinstance(node, Node):
-            raise TypeError(
-                "Cannot swap 'Node' type with '{}' type.".format(type(node)))
-        self.data, node.data = node.data, self.data
 
 
 class Tree:
@@ -112,7 +86,7 @@ class Tree:
             return new_node, 1 + new_size
 
         new_root, new_size = recur_copy(self._root)
-        # Warning: use self.__class__ instead of Tree, to avoid mistake in subclassing.
+        # Warning: use `self.__class__` instead of `Tree` or `__class__`, to avoid mistake in subclassing.
         new_tree = self.__class__()
         new_tree._root = new_root
         new_tree._size = new_size
@@ -130,6 +104,7 @@ class Tree:
             Note that the retrieval is real-time, which means altering the tree between two consecutive generator call may result in different results.
         """
         if order is None:
+            # Use `self.__class__` instead of `__class__`, otherwise there will be errora behavior in subclassing.
             order = self.__class__.default_traversal_order
 
         for node in self._traverse(order):
