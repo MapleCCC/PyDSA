@@ -2,6 +2,7 @@ import gc
 
 from ..queue import Queue
 
+SENTINEL = object()
 
 class Node:
     def __init__(self, data):
@@ -26,7 +27,7 @@ class Node:
 
 class Tree:
     def __init__(self):
-        self._root = None
+        self._root = Node(SENTINEL)
         self._size = 0
 
     __slots__ = ["_root", "_size"]
@@ -34,15 +35,14 @@ class Tree:
     def clear(self):
         # A more memory efficient way is to deallocate all nodes. Reduce burden on gc. But it also yields overhead.
         # Unlike writing C, idiomatic writing style in Python would be to leave the task to gabbage collector.
-        self._root = None
-        gc.collect()
+        self._root = Node(SENTINEL)
         self._size = 0
         return self
 
     @property
     def root(self):
-        if self._root is None:
-            return None
+        if self._root.data is SENTINEL:
+            raise KeyError("No root in an empty Tree")
         return self._root.data
 
     @property
@@ -59,12 +59,12 @@ class Tree:
         return self._recursive_str(self._root)
 
     def _recursive_str(self, node):
-        if node is None:
-            return 'None'
+        if node.data is SENTINEL:
+            return "An empty tree"
         if len(node.children) == 0:
             return "Node(data={})".format(node.data)
         else:
-            return "Node(data={}, children=[{}])".format(node.data, ', '.join(self._recursive_str(child) for child in node.children))
+            return "Node(data={}, children=[{}])".format(node.data, ', '.join(self._recursive_str(child) for child in node.children if child.data is not SENTINEL))
 
     def __repr__(self):
         return str(self)
@@ -76,8 +76,8 @@ class Tree:
             This method only guarantees deep copy to the level of node.
         """
         def recur_copy(node):
-            if node is None:
-                return None, 0
+            if node.data is SENTINEL:
+                return Node(SENTINEL), 0
             new_node = node.copy()
             new_size = 1
             for child in new_node.children:
@@ -124,7 +124,7 @@ class Tree:
         return self._pre_order_traverse(self._root)
 
     def _pre_order_traverse(self, node):
-        if node is None:
+        if node.data is SENTINEL:
             return
         yield node
         for child in node.children:
@@ -134,7 +134,7 @@ class Tree:
         return self._post_order_traverse(self._root)
 
     def _post_order_traverse(self, node):
-        if node is None:
+        if node.data is SENTINEL:
             return
         for child in node.children:
             yield from self._post_order_traverse(child)
@@ -145,7 +145,7 @@ class Tree:
         q.enqueue(self._root)
         while not q.isEmpty():
             node = q.dequeue()
-            if node is not None:
+            if node.data is not SENTINEL:
                 yield node
                 for child in node.children:
                     q.enqueue(child)
@@ -176,48 +176,6 @@ class Tree:
     #     print("\n")
 
 
-class M_aryNode(Node):
-    def __init__(self, data, branch=2):
-        super().__init__(data)
-        self.children = [None] * branch
-
-
-class M_aryTree(Tree):
-    def __init__(self, m):
-        super().__init__()
-        if not isinstance(m, int) or m <= 0:
-            raise ValueError("Valid branch number is a natural number.")
-        self.branch = m
-
-
-class BinaryNode(M_aryNode):
-    def __init__(self, data):
-        super().__init__(data, branch=2)
-
-    @property
-    def left(self):
-        return self.children[0]
-
-    @left.setter
-    def left(self, node):
-        if not isinstance(node, (BinaryNode, type(None))):
-            raise ValueError
-        self.children[0] = node
-
-    @property
-    def right(self):
-        return self.children[1]
-
-    @right.setter
-    def right(self, node):
-        if not isinstance(node, (BinaryNode, type(None))):
-            raise ValueError
-        self.children[1] = node
-
-
-class BinaryTree(M_aryTree):
-    def __init__(self):
-        super().__init__(m=2)
 
 
 if __name__ == '__main__':

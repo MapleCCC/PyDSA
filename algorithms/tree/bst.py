@@ -45,8 +45,9 @@ import random
 from functools import wraps
 
 from ..utils import decorate_all_methods
-from .abstract_tree import BinaryNode as Node
-from .abstract_tree import BinaryTree
+from .binary_tree import SENTINEL
+from .binary_tree import BinaryNode as Node
+from .binary_tree import BinaryTree
 
 
 def check_comparable(func):
@@ -77,7 +78,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_height(self._root)
 
     def recur_height(self, node):
-        if node is None:
+        if node.data is SENTINEL:
             return 0
         return 1 + max(self.recur_height(node.left), self.recur_height(node.right))
 
@@ -86,9 +87,11 @@ class BinarySearchTree(BinaryTree):
         return self
 
     def recur_insert(self, node, data):
-        if node is None:
+        if node.data is SENTINEL:
             self._size += 1
-            return Node(data)
+            new = Node(data)
+            new.left = new.right = Node(SENTINEL)
+            return new
 
         if data == node.data:
             return node
@@ -103,7 +106,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_search(self._root, data)
 
     def recur_search(self, node, data):
-        if node is None:
+        if node.data is SENTINEL:
             return False
 
         if data == node.data:
@@ -114,47 +117,65 @@ class BinarySearchTree(BinaryTree):
             return self.recur_search(node.left, data)
 
     def remove(self, data):
-        self._root = self.recur_remove(self._root, data)
+        self.recur_remove(self._root, data)
         return self
 
     def recur_remove(self, node, data):
-        if node is None:
-            return None
+        if node.data is SENTINEL:
+            return
 
         if data < node.data:
-            node.left = self.recur_remove(node.left, data)
-            return node
+            self.recur_remove(node.left, data)
         elif data > node.data:
-            node.right = self.recur_remove(node.right, data)
-            return node
+            self.recur_remove(node.right, data)
         else:
-            self._size -= 1
+            self._remove_node(node)
+
+    def _remove_node(self, node):
+
+        def replace_with_left_max(node):
+            assert node.left.data is not SENTINEL
+            left_max = node.left
+            prev = node
+            while left_max.right.data is not SENTINEL:
+                prev = left_max
+                left_max = left_max.right
+            prev.right = left_max.left
+            node.data = left_max.data
+
+        def replace_with_right_min(node):
+            assert node.right.data is not SENTINEL
+            right_min = node.right
+            prev = node
+            while right_min.left.data is not SENTINEL:
+                prev = right_min
+                right_min = right_min.left
+            prev.left = right_min.right
+            node.data = right_min.data
+
+        if node.data is SENTINEL:
+            return
+
+        self._size -= 1
+
+        has_left_child = node.left.data is not SENTINEL
+        has_right_child = node.right.data is not SENTINEL
+
+        if not has_left_child and not has_right_child:
+            node.data = SENTINEL
+            node.left = node.right = None
+        elif has_left_child and has_right_child:
             # Randomly pick node to delete from two choices:
             # "max node in left sub tree", or "min node in right sub tree"
             if random.choice([0, 1]):
-                if node.left is not None:
-                    itr = node.left
-                    prev = node
-                    while itr.right is not None:
-                        prev = itr
-                        itr = itr.right
-                    prev.right = itr.left
-                    node.data = itr.data
-                    return node
-                else:
-                    return node.right
+                replace_with_left_max(node)
             else:
-                if node.right is not None:
-                    itr = node.right
-                    prev = node
-                    while itr.left is not None:
-                        prev = itr
-                        itr = itr.left
-                    prev.left = itr.right
-                    node.data = itr.data
-                    return node
-                else:
-                    return node.left
+                replace_with_right_min(node)
+        elif has_left_child:
+            replace_with_left_max(node)
+        else:
+            replace_with_right_min(node)
+
 
     default_traversal_order = "in_order"
 
@@ -165,7 +186,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_in_order_traverse(self._root)
 
     def recur_in_order_traverse(self, node):
-        if node is None:
+        if node.data is SENTINEL:
             return
         yield from self.recur_in_order_traverse(node.left)
         yield node
@@ -175,7 +196,7 @@ class BinarySearchTree(BinaryTree):
         return self.recur_out_order_traverse(self._root)
 
     def recur_out_order_traverse(self, node):
-        if node is None:
+        if node.data is SENTINEL:
             return
         yield from self.recur_out_order_traverse(node.right)
         yield node
