@@ -14,18 +14,22 @@ class RecencyTracker:
     """
     Complexity:
     -----------
-    | get_lru | amortized O() |
+    | get(pop)_lru | amortized O() |
     | update_mru | amortized O(1) |
     | remove | O(1) |
 
     Space complexity:
     -----------------
-    Depends on _gc_check detail
+    Depends on `_gc_check` detail
     """
 
     def __init__(self):
+        # _storage holds all the elements in recency order. Least recently used on the left.
+        # some elements in _storage are garbage.
         self._storage = []
+        # _indexer tracks the element's position in _storage
         self._indexer = {}
+        # _offset marks a position in _storage, to the left of which are all garbage. Maintain for speed-up other operations.
         self._offset = 0
 
     __slots__ = ['_storage', '_indexer', '_offset']
@@ -40,17 +44,24 @@ class RecencyTracker:
         return len(self._indexer)
 
     def pop_lru(self):
-        for index, entry in enumerate(self._storage[self._offset:]):
+        for index, entry in enumerate(self._storage, self._offset):
+            # traverse from the position marked by _offset to the right, until the first non-garbage element is found.
             if entry is not DELETED:
+                # Found the least recenlty used entry.
+                # Update the _offset to mark the newest position where to the left of it are all garbage.
                 self._offset = index + 1
+                # Instead of deleting an element from the middle of a list, which is expensive, we lazily mark it as DELETED
                 self._storage[index] = DELETED
                 del self._indexer[entry]
                 return entry
         raise IndexError("pop lru from empty recency tracker")
 
     def get_lru(self):
-        for index, entry in enumerate(self._storage[self._offset:]):
+        for index, entry in enumerate(self._storage, self._offset):
+            # traverse from the position marked by _offset to the right, until the first non-garbage element is found.
             if entry is not DELETED:
+                # Found the least recenlty used entry.
+                # Update the _offset to mark the newest position where to the left of it are all garbage.
                 self._offset = index
                 return entry
         raise IndexError("get lru from empty recency tracker")
@@ -69,6 +80,7 @@ class RecencyTracker:
     def remove(self, entry):
         try:
             index = self._indexer[entry]
+            # Instead of deleting an element from the middle of a list, which is expensive, we lazily mark it as DELETED
             self._storage[index] = DELETED
             del self._indexer[entry]
         except KeyError:
@@ -79,7 +91,7 @@ class RecencyTracker:
         """
         Criteria of choosing check condition is
         1. reduce space waste
-        2. avoid excessive and frequenct garbage collect causing large overhead
+        2. avoid excessive and frequenct garbage collection causing large overhead
         """
         too_much_hole = len(self._storage) - \
             self._offset > 2 * len(self._indexer)
