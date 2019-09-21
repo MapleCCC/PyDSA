@@ -1,2 +1,3 @@
-from algorithms.stack import Stack
 import unittest
+
+from algorithms.stack import Stack

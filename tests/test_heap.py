@@ -1,6 +1,6 @@
 import unittest
-from algorithms.heap import Heap
 
+from algorithms.heap import Heap
 
 class TestHeap(unittest.TestCase):
     def setUp(self):

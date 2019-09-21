@@ -1,5 +1,6 @@
-from algorithms.tree.splay_tree import SplayTree
 import unittest
+
+from algorithms.tree.splay_tree import SplayTree
 
 
 class TestSplayTree(unittest.TestCase):

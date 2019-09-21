@@ -1,6 +1,7 @@
-from algorithms.sort import *
 import unittest
 from collections import Counter
+
+from algorithms.sort import *
 
 
 class TestSort(unittest.TestCase):
