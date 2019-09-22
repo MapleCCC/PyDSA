@@ -37,6 +37,11 @@ class Vomitter:
             self._storage.pop(0)
 
     def emit(self, distribution=RVDistribution.NORMAL):
+        if self._storage == []:
+            raise IndexError("Emit from empty vomitter")
+        if len(self._storage) == 1:
+            return self._storage[0]
+
         N = len(self._storage)
 
         if distribution == RVDistribution.NORMAL:
@@ -58,33 +63,11 @@ class Vomitter:
         # Use N as threshold instead of N=1
         if r <= N:
             index = N - 1 - floor(r)
+            return self._storage[index]
         else:
             # if the random number generated go beyond threshold,
             # then just output the most recently added element.
-            index = N - 1
-        return self._storage[index]
-
-    # def emit(self):
-    #     if len(self._storage) == 0:
-    #         raise IndexError("Nothing to emit")
-
-    #     # randomly pick a value as candidate for emitting
-    #     index = random.randint(0, len(self._storage) - 1)
-    #     print("Index: {}".format(index))
-    #     N = len(self._storage)
-    #     total_sum = N * (N + 1) / 2
-
-    #     # The possibility to emit the candidate value is (index / total_sum) %.
-    #     # Otherwise, simply emit the newest added value instead.
-    #     possibility = (index + 1) / total_sum
-    #     r = random.uniform(0, 1)
-    #     print("Randomness: {}, Possibility: {}".format(r, possibility))
-    #     if r <= possibility:
-    #         print("Emit candidate value")
-    #         return self._storage[index]
-    #     else:
-    #         print("Emit newest addede value")
-    #         return self._storage[N - 1]
+            return self._storage[-1]
 
 
 if __name__ == '__main__':
