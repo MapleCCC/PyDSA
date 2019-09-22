@@ -16,11 +16,10 @@ class Stack:
         self._storage.append(element)
 
     def pop(self):
-        if self.isEmpty():
+        try:
+            return self._storage.pop()
+        except IndexError:
             raise IndexError("pop from empty stack")
-        ret = self.top
-        self._storage = self._storage[:-1]
-        return ret
 
     @property
     def size(self):
@@ -34,9 +33,10 @@ class Stack:
 
     @property
     def top(self):
-        if self.isEmpty():
+        try:
+            return self._storage[-1]
+        except IndexError:
             raise KeyError("Empty stack has no top")
-        return self._storage[-1]
 
     def __str__(self):
         if self.isEmpty():
@@ -45,10 +45,9 @@ class Stack:
             return "Stack(top={})".format(self.top)
         if self.size == 2:
             return "Stack(top={}, bottom={})".format(self.top, self._storage[0])
-        top = self._storage[-1]
-        bottom = self._storage[0]
-        other = ",".join(str(x) for x in self._storage[1:-1][::-1])
-        return "Stack(top={}, {}, bottom={})".format(top, other, bottom)
+
+        other = ",".join(map(str, self._storage[1:-1][::-1]))
+        return "Stack(top={}, {}, bottom={})".format(self.top, other, self._storage[0])
 
     def __repr__(self):
         return str(self)
