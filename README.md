@@ -16,10 +16,15 @@ A toy project dedicated to study purpose. Learn both Python programming language
 
 ## Run Test
 
+The repo uses [`hypothesis`](https://github.com/HypothesisWorks/hypothesis) to test. Install it before running unit tests.
+
 ```bash
+# Install prerequisites
+$ pip install -r test_requirements.txt
+
 # Run all test suites
 $ make test
 
-# Run a certain test
+# Run a specific test
 $ python -m unittest test.test_splay_tree
 ```
